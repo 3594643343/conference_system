@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.hnu.conference_system.mapper.UserInfoMapper">
+
+    <resultMap id="BaseResultMap" type="edu.hnu.conference_system.domain.UserInfo">
+            <id property="userId" column="user_id" jdbcType="BIGINT"/>
+            <result property="recordId" column="record_id" jdbcType="BIGINT"/>
+            <result property="userName" column="user_name" jdbcType="VARCHAR"/>
+            <result property="userPassword" column="user_password" jdbcType="VARCHAR"/>
+            <result property="userEmail" column="user_email" jdbcType="VARCHAR"/>
+            <result property="userRegTime" column="user_reg_time" jdbcType="TIMESTAMP"/>
+            <result property="userSignature" column="user_signature" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        user_id,record_id,user_name,
+        user_password,user_email,user_reg_time,
+        user_signature
+    </sql>
+</mapper>

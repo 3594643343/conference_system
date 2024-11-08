@@ -24,11 +24,6 @@ public class UserInfo implements Serializable {
     /**
      * 
      */
-    private Long recordId;
-
-    /**
-     * 
-     */
     private String userName;
 
     /**
@@ -51,6 +46,11 @@ public class UserInfo implements Serializable {
      */
     private String userSignature;
 
+    /**
+     * 
+     */
+    private Boolean isAdmin;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
@@ -67,12 +67,12 @@ public class UserInfo implements Serializable {
         }
         UserInfo other = (UserInfo) that;
         return (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
-            && (this.getRecordId() == null ? other.getRecordId() == null : this.getRecordId().equals(other.getRecordId()))
             && (this.getUserName() == null ? other.getUserName() == null : this.getUserName().equals(other.getUserName()))
             && (this.getUserPassword() == null ? other.getUserPassword() == null : this.getUserPassword().equals(other.getUserPassword()))
             && (this.getUserEmail() == null ? other.getUserEmail() == null : this.getUserEmail().equals(other.getUserEmail()))
             && (this.getUserRegTime() == null ? other.getUserRegTime() == null : this.getUserRegTime().equals(other.getUserRegTime()))
-            && (this.getUserSignature() == null ? other.getUserSignature() == null : this.getUserSignature().equals(other.getUserSignature()));
+            && (this.getUserSignature() == null ? other.getUserSignature() == null : this.getUserSignature().equals(other.getUserSignature()))
+            && (this.getIsAdmin() == null ? other.getIsAdmin() == null : this.getIsAdmin().equals(other.getIsAdmin()));
     }
 
     @Override
@@ -80,12 +80,12 @@ public class UserInfo implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
-        result = prime * result + ((getRecordId() == null) ? 0 : getRecordId().hashCode());
         result = prime * result + ((getUserName() == null) ? 0 : getUserName().hashCode());
         result = prime * result + ((getUserPassword() == null) ? 0 : getUserPassword().hashCode());
         result = prime * result + ((getUserEmail() == null) ? 0 : getUserEmail().hashCode());
         result = prime * result + ((getUserRegTime() == null) ? 0 : getUserRegTime().hashCode());
         result = prime * result + ((getUserSignature() == null) ? 0 : getUserSignature().hashCode());
+        result = prime * result + ((getIsAdmin() == null) ? 0 : getIsAdmin().hashCode());
         return result;
     }
 
@@ -96,12 +96,12 @@ public class UserInfo implements Serializable {
         sb.append(" [");
         sb.append("Hash = ").append(hashCode());
         sb.append(", userId=").append(userId);
-        sb.append(", recordId=").append(recordId);
         sb.append(", userName=").append(userName);
         sb.append(", userPassword=").append(userPassword);
         sb.append(", userEmail=").append(userEmail);
         sb.append(", userRegTime=").append(userRegTime);
         sb.append(", userSignature=").append(userSignature);
+        sb.append(", isAdmin=").append(isAdmin);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

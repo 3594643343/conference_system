@@ -1,10 +1,10 @@
 package edu.hnu.conference_system.controller;
 
 
-import edu.hnu.conference_system.dto.LoginDto;
+
 import edu.hnu.conference_system.result.Result;
-import edu.hnu.conference_system.vo.LoginVo;
 import edu.hnu.conference_system.service.UserInfoService;
+import edu.hnu.conference_system.vo.LoginVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/login")
 @Tag(name = "登录接口")
@@ -22,12 +24,32 @@ public class LoginController {
     @Resource
     UserInfoService userInfoService;
 
-    @PostMapping
-    @Operation(summary = "用户登录")
     /*
     用户 用户名密码登录
      */
-    public Result login(@RequestBody LoginDto loginDto){
-        return userInfoService.userLogin(loginDto);
+    @PostMapping()
+    @Operation(summary = "密码登录")
+    public Result namePassLogin(@RequestBody Map<String, String> request){
+        return userInfoService.passLogin(request);
     }
+
+
+    /*
+    用户 邮箱密码登录
+     */
+    /*@PostMapping("/emailpass")
+    @Operation(summary = "邮箱密码登录")
+    public Result emailLogin(@RequestBody Map<String, String> request){
+        return userInfoService.emailLogin(request);
+    }*/
+
+    /*
+    用户 验证码登录
+     */
+    //先不坐
+    /*@PostMapping("/valicode")
+    @Operation(summary = "验证码登录")
+    public Result codeLogin(@RequestBody LoginDto loginDto){
+        return userInfoService.codeLogin(loginDto);
+    }*/
 }

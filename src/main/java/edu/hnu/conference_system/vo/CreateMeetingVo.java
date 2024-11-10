@@ -1,4 +1,4 @@
-package edu.hnu.conference_system.dto;
+package edu.hnu.conference_system.vo;
 
 
 import lombok.AllArgsConstructor;
@@ -8,8 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto {
-    private Long userId;
-    private String userName;
-
+public class CreateMeetingVo {
+    /**
+     * 会议号
+     */
+    private String meetingNumber;
 }

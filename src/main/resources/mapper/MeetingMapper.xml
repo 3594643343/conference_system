@@ -5,7 +5,7 @@
 <mapper namespace="edu.hnu.conference_system.mapper.MeetingMapper">
 
     <resultMap id="BaseResultMap" type="edu.hnu.conference_system.domain.Meeting">
-            <id property="meetingId" column="meeting_id" jdbcType="CHAR"/>
+            <id property="meetingId" column="meeting_id" jdbcType="BIGINT"/>
             <result property="userId" column="user_id" jdbcType="BIGINT"/>
             <result property="meetingsMinutesId" column="meetings_minutes_id" jdbcType="BIGINT"/>
             <result property="recordId" column="record_id" jdbcType="BIGINT"/>
@@ -13,6 +13,8 @@
             <result property="meetingName" column="meeting_name" jdbcType="VARCHAR"/>
             <result property="participantCount" column="participant_count" jdbcType="INTEGER"/>
             <result property="meetingNumber" column="meeting_number" jdbcType="VARCHAR"/>
+            <result property="meetingPassword" column="meeting_password" jdbcType="VARCHAR"/>
+            <result property="defaultPermission" column="default_permission" jdbcType="INTEGER"/>
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
             <result property="meetingStartTime" column="meeting_start_time" jdbcType="TIMESTAMP"/>
             <result property="meetingEndTime" column="meeting_end_time" jdbcType="TIMESTAMP"/>
@@ -23,7 +25,7 @@
     <sql id="Base_Column_List">
         meeting_id,user_id,meetings_minutes_id,
         record_id,meeting_audio_id,meeting_name,
-        participant_count,meeting_number,create_time,
+        participant_count,meeting_number,meeting_password,default_permission,create_time,
         meeting_start_time,meeting_end_time,meeting_time,
         meeting_state
     </sql>

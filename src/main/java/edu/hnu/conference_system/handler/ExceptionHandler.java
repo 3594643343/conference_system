@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@Slf4j
+/*@Slf4j
 @RestControllerAdvice
 public class ExceptionHandler {
     @org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
@@ -22,4 +22,4 @@ public class ExceptionHandler {
         //log.error("全局异常信息 ex = {}", msg, e);
         return Result.error(msg);
     }
-}
+}*/

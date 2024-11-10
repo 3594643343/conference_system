@@ -6,7 +6,10 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 
@@ -14,72 +17,109 @@ import lombok.Data;
  */
 @TableName(value ="meeting")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Meeting implements Serializable {
     /**
-     * 
+     * 会议id
      */
     @TableId
-    private String meetingId;
+    private Long meetingId;
 
     /**
-     * 
+     * 创建者id
      */
     private Long userId;
 
     /**
-     * 
+     * 纪要id
      */
     private Long meetingsMinutesId;
 
     /**
-     * 
+     * 记录id
      */
     private Long recordId;
 
     /**
-     * 
+     * 音频id
      */
     private Long meetingAudioId;
 
     /**
-     * 
+     * 会议名称
      */
     private String meetingName;
 
     /**
-     * 
+     * 参会人数
      */
     private Integer participantCount;
 
     /**
-     * 
+     * 会议号
      */
     private String meetingNumber;
+    /**
+     * 会议密码  快速会议密码为"0"
+     */
+    private String meetingPassword;
 
     /**
-     * 
+     * 默认入会权限 0 与会者  1 管理员
+     */
+    private Integer defaultPermission;
+
+    /**
+     * 创建时间
      */
     private LocalDateTime createTime;
 
     /**
-     * 
+     * 开始时间
      */
     private LocalDateTime meetingStartTime;
 
     /**
-     * 
+     * 结束时间
      */
     private LocalDateTime meetingEndTime;
 
     /**
-     * 
+     * 会议时长
      */
     private LocalTime meetingTime;
 
     /**
-     * 
+     * 会议状态   未开始 off  进行中 on   已结束 end
      */
     private String meetingState;
+
+    public Meeting(String meetingName,String meetingNumber,String meetingPassword,
+                   Long createrId,LocalDateTime startTime,LocalDateTime endTime, Integer defaultPermission)
+    {
+        this.meetingName = meetingName;
+        this.meetingNumber = meetingNumber;
+        this.meetingPassword = meetingPassword;
+        this.userId = createrId;
+        this.meetingStartTime = startTime;
+        this.meetingEndTime = endTime;
+        this.createTime = LocalDateTime.now();
+        this.defaultPermission = defaultPermission;
+        this.meetingState = "off";
+    }
+    public Meeting(String meetingName,String meetingNumber,
+                   Long createrId,LocalDateTime startTime )
+    {
+        this.meetingName = meetingName;
+        this.meetingNumber = meetingNumber;
+        this.meetingPassword = "0";
+        this.userId = createrId;
+        this.meetingStartTime = startTime;
+        this.createTime = LocalDateTime.now();
+        this.defaultPermission = 0;
+        this.meetingState = "off";
+    }
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
@@ -104,6 +144,7 @@ public class Meeting implements Serializable {
             && (this.getMeetingName() == null ? other.getMeetingName() == null : this.getMeetingName().equals(other.getMeetingName()))
             && (this.getParticipantCount() == null ? other.getParticipantCount() == null : this.getParticipantCount().equals(other.getParticipantCount()))
             && (this.getMeetingNumber() == null ? other.getMeetingNumber() == null : this.getMeetingNumber().equals(other.getMeetingNumber()))
+                && (this.getMeetingPassword() == null ? other.getMeetingPassword() == null : this.getMeetingPassword().equals(other.getMeetingPassword()))
             && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
             && (this.getMeetingStartTime() == null ? other.getMeetingStartTime() == null : this.getMeetingStartTime().equals(other.getMeetingStartTime()))
             && (this.getMeetingEndTime() == null ? other.getMeetingEndTime() == null : this.getMeetingEndTime().equals(other.getMeetingEndTime()))
@@ -123,6 +164,7 @@ public class Meeting implements Serializable {
         result = prime * result + ((getMeetingName() == null) ? 0 : getMeetingName().hashCode());
         result = prime * result + ((getParticipantCount() == null) ? 0 : getParticipantCount().hashCode());
         result = prime * result + ((getMeetingNumber() == null) ? 0 : getMeetingNumber().hashCode());
+        result = prime * result + ((getMeetingPassword() == null) ? 0 : getMeetingPassword().hashCode());
         result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());
         result = prime * result + ((getMeetingStartTime() == null) ? 0 : getMeetingStartTime().hashCode());
         result = prime * result + ((getMeetingEndTime() == null) ? 0 : getMeetingEndTime().hashCode());

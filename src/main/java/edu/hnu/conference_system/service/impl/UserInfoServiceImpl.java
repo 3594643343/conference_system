@@ -2,6 +2,7 @@ package edu.hnu.conference_system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import edu.hnu.conference_system.domain.User;
 import edu.hnu.conference_system.domain.UserInfo;
 import edu.hnu.conference_system.dto.UserDto;
 import edu.hnu.conference_system.mapper.UserInfoMapper;
@@ -11,6 +12,8 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import edu.hnu.conference_system.service.UserInfoService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static edu.hnu.conference_system.utils.JwtUtils.generateTokenForUser;
@@ -24,6 +27,12 @@ import static edu.hnu.conference_system.utils.SecurityUtil.EncryptedPassword;
 @Service
 public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     implements UserInfoService {
+
+    /**
+     * 存放在线的用户
+     */
+    static List<User> userList = new ArrayList<>();
+
 
     @Resource
     UserInfoMapper userMapper;
@@ -48,6 +57,8 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         }else if(user.getUserPassword().equals(password)){
             UserDto userDto = new UserDto(user.getUserId(), user.getUserName());
             String token = generateTokenForUser(userDto);
+            User user1 = new User(user.getUserId(),user.getUserName(),null,null,-1,null);
+            userList.add(user1);
             LoginVo loginVo = new LoginVo(user.getIsAdmin(),token);
             return Result.success(loginVo);
         }

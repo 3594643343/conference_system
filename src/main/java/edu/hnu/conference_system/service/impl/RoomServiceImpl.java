@@ -89,6 +89,7 @@ public class RoomServiceImpl implements RoomService {
                  * 纪要id等
                  */
 
+
                 //将要关闭的房间中的用户与会议相关的变量清空并全踢出房间
 
                 //System.out.println(room.getMeetingNumber()+"中有"+room.getMembers().size());

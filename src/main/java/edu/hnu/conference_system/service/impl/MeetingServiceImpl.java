@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static edu.hnu.conference_system.service.impl.RoomServiceImpl.roomList;
 import static edu.hnu.conference_system.service.impl.UserInfoServiceImpl.userList;
 
 

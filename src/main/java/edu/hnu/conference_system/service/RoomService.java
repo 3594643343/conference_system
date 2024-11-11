@@ -4,6 +4,10 @@ package edu.hnu.conference_system.service;
 import edu.hnu.conference_system.domain.Meeting;
 import edu.hnu.conference_system.domain.Room;
 import edu.hnu.conference_system.domain.User;
+import edu.hnu.conference_system.result.Result;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.Map;
 
 public interface RoomService {
 
@@ -14,4 +18,8 @@ public interface RoomService {
     void leaveRoom(String meetingNumber);
 
     Meeting deleteRoom(String meetingNumber);
+
+    void saveAllUserInMeeting(Room room);
+
+    Result getUserBrief(Map<String,String> request);
 }

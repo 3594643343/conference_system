@@ -8,9 +8,11 @@ import edu.hnu.conference_system.dto.UserDto;
 import edu.hnu.conference_system.mapper.UserInfoMapper;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.vo.LoginVo;
+import edu.hnu.conference_system.vo.UserBriefVo;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import edu.hnu.conference_system.service.UserInfoService;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +69,24 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         }
     }
 
+
+    /**
+     * 生成一个UserBriefVo
+     * @param id
+     * @return
+     */
+    @Override
+    public UserBriefVo buildUserBriefVo(Long id) {
+        UserBriefVo userBriefVo = new UserBriefVo();
+
+        UserInfo userInfo = userMapper.selectOne(
+                new QueryWrapper<UserInfo>().eq("user_id",id));
+        userBriefVo.setId(userInfo.getUserId());
+        userBriefVo.setUsername(userInfo.getUserName());
+        userBriefVo.setAvatar(MultipartFile);
+
+        return userBriefVo;
+    }
 
 
 }

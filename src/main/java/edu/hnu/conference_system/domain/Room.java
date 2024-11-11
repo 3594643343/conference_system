@@ -18,6 +18,11 @@ public class Room {
     private String roomName;
 
     /**
+     * 会议id
+     */
+    private Long meetingId;
+
+    /**
      * 会议号
      */
     private String meetingNumber;
@@ -42,9 +47,15 @@ public class Room {
     private Long createrId;
 
     /**
-     * 房间成员
+     * 现在在房间的成员
      */
-    private List<User> Members;
+    private List<User> MembersOn;
+
+    /**
+     * 所有加入过房间的成员id
+     */
+    private List<Long> MembersAll;
+
 
     @Override
     public String toString() {
@@ -52,7 +63,7 @@ public class Room {
                 "roomName='" + roomName + '\'' +
                 "meetingNumber='" + meetingNumber + '\'' +
                 ", createrId='" + createrId + '\'' +
-                ", Members=" + Members +
+                ", Members=" + MembersOn +
                 '}';
     }
 

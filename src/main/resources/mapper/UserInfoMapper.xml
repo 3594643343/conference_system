@@ -12,11 +12,12 @@
             <result property="userRegTime" column="user_reg_time" jdbcType="TIMESTAMP"/>
             <result property="userSignature" column="user_signature" jdbcType="VARCHAR"/>
             <result property="isAdmin" column="is_admin" jdbcType="BIT"/>
+            <result property="avatarPath" column="avatar_path" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         user_id,user_name,user_password,
         user_email,user_reg_time,user_signature,
-        is_admin
+        is_admin,avatar_path
     </sql>
 </mapper>

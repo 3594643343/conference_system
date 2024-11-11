@@ -51,6 +51,13 @@ public class UserInfo implements Serializable {
      */
     private Boolean isAdmin;
 
+    /**
+     *
+     */
+    private String avatarPath;
+
+
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 

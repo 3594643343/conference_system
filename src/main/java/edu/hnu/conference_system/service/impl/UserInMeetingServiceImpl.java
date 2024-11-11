@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.hnu.conference_system.domain.UserInMeeting;
 import edu.hnu.conference_system.service.UserInMeetingService;
 import edu.hnu.conference_system.mapper.UserInMeetingMapper;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
 * @author lenovo
@@ -15,6 +18,19 @@ import org.springframework.stereotype.Service;
 public class UserInMeetingServiceImpl extends ServiceImpl<UserInMeetingMapper, UserInMeeting>
     implements UserInMeetingService{
 
+
+    @Resource
+    private UserInMeetingMapper userInMeetingMapper;
+
+    @Override
+    public void saveAllUserInMeeting(Long meetingId, List<Long> userIds) {
+        for (Long userId : userIds) {
+            UserInMeeting uim = new UserInMeeting();
+            uim.setMeetingId(meetingId);
+            uim.setUserId(userId);
+            userInMeetingMapper.insert(uim);
+        }
+    }
 }
 
 

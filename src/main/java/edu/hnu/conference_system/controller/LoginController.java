@@ -2,6 +2,7 @@ package edu.hnu.conference_system.controller;
 
 
 
+import edu.hnu.conference_system.dto.LoginDto;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.UserInfoService;
 import edu.hnu.conference_system.vo.LoginVo;
@@ -29,8 +30,8 @@ public class LoginController {
      */
     @PostMapping()
     @Operation(summary = "密码登录")
-    public Result namePassLogin(@RequestBody Map<String, String> request){
-        return userInfoService.passLogin(request);
+    public Result namePassLogin(@RequestBody LoginDto loginDto) {
+        return userInfoService.passLogin(loginDto);
     }
 
 

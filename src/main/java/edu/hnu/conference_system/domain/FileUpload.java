@@ -22,7 +22,7 @@ public class FileUpload implements Serializable {
     /**
      * 
      */
-    @TableId
+    //@TableId
     private String fileId;
 
     @TableField(exist = false)

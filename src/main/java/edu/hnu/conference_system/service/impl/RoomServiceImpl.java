@@ -175,6 +175,7 @@ public class RoomServiceImpl implements RoomService {
                 break;
             }
         }
+        System.out.println("在会人:"+userInfoVos.size()+"/n"+"房间数"+roomList.size());
         return Result.success(userInfoVos);
     }
 
@@ -189,7 +190,7 @@ public class RoomServiceImpl implements RoomService {
         for(Room room : roomList) {
             if(room.getMeetingNumber().equals(muteDto.getMeetingNumber())) {
                 for(User user : room.getMembersOn()) {
-                    if(user.getId().equals(UserHolder.getUserId())) {
+                    if(user.getId().equals(muteDto.getUserId())) {
                         //TODO 禁言的实现
                         return Result.success("已禁言"+user.getUsername());
                     }
@@ -211,7 +212,7 @@ public class RoomServiceImpl implements RoomService {
         for(Room room : roomList) {
             if(room.getMeetingNumber().equals(muteDto.getMeetingNumber())) {
                 for(User user : room.getMembersOn()) {
-                    if(user.getId().equals(UserHolder.getUserId())) {
+                    if(user.getId().equals(muteDto.getUserId())) {
                         //TODO 解除禁言的实现
                         return Result.success("已解除"+user.getUsername()+"禁言");
                     }
@@ -293,7 +294,7 @@ public class RoomServiceImpl implements RoomService {
         try{
             fileDir.mkdirs();
         }catch (Exception e){
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         String path = dirPath+"/"+fileName;
@@ -315,8 +316,7 @@ public class RoomServiceImpl implements RoomService {
 
             return Result.success("上传成功!");
         } catch (Exception e) {
-            e.printStackTrace();
-            return Result.error("上传失败!");
+            throw new RuntimeException(e);
         }
     }
 

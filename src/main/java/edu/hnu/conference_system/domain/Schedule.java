@@ -22,7 +22,7 @@ public class Schedule implements Serializable {
     /**
      * 
      */
-    @TableId
+    //@TableId
     private Long userId;
 
     @TableField(exist = false)

@@ -20,3 +20,4 @@ server:
 files-upload-url:
   avatar: D://code/files_upload/avatar
   file: D://code/files_upload/file
+debug: false

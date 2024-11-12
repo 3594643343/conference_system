@@ -3,6 +3,7 @@ package edu.hnu.conference_system.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import edu.hnu.conference_system.domain.Meeting;
 import edu.hnu.conference_system.dto.BookMeetingDto;
+import edu.hnu.conference_system.dto.JoinMeetingDto;
 import edu.hnu.conference_system.result.Result;
 
 import java.util.Map;
@@ -18,7 +19,7 @@ public interface MeetingService extends IService<Meeting> {
 
     Result quickMeeting();
 
-    Result joinMeeting(Map<String,String> request);
+    Result joinMeeting(JoinMeetingDto joinMeetingDto);
 
     void startMeeting(Meeting meeting);
 

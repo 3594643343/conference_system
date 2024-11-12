@@ -22,7 +22,7 @@ public class UserInMeeting implements Serializable {
     /**
      * 
      */
-    @TableId
+   // @TableId
     private Long meetingId;
 
     @TableField(exist = false)

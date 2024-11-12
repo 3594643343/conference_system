@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.hnu.conference_system.domain.User;
 import edu.hnu.conference_system.domain.UserInfo;
+import edu.hnu.conference_system.dto.LoginDto;
 import edu.hnu.conference_system.dto.UserDto;
 import edu.hnu.conference_system.mapper.UserInfoMapper;
 import edu.hnu.conference_system.result.Result;
@@ -17,6 +18,7 @@ import edu.hnu.conference_system.service.UserInfoService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static edu.hnu.conference_system.utils.JwtUtils.generateTokenForUser;
 import static edu.hnu.conference_system.utils.SecurityUtil.EncryptedPassword;
@@ -40,15 +42,21 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     UserInfoMapper userMapper;
 
     @Override
-    public Result passLogin(Map<String, String> request) {
-        String name = request.get("userName");
-        String email = request.get("userEmail");
-        String loginStr = (name ==null)?email:name;
-        String col = (name ==null)?"user_email":"user_name";
-        String password = EncryptedPassword(request.get("userPassword"));
+    public Result passLogin(LoginDto loginDto) {
+        String name = loginDto.getUserName();
+        String email = loginDto.getUserEmail();
+        if(name == null && email == null) {
+            return Result.error("请输入账号或邮箱!");
+        }
+        String loginStr = (Objects.equals(name, ""))?email:name;
+        String col = (Objects.equals(name, ""))?"user_email":"user_name";
+        String password = EncryptedPassword(loginDto.getUserPassword());
 
-        //System.out.println(loginStr);
-        //System.out.println(password);
+        System.out.println(name);
+        System.out.println(email);
+        System.out.println(loginStr);
+        System.out.println(loginDto.getUserPassword());
+        System.out.println(password);
 
         UserInfo user = userMapper.selectOne(
                 new QueryWrapper<UserInfo>().eq(col, loginStr));
@@ -82,7 +90,12 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
                 new QueryWrapper<UserInfo>().eq("user_id",id));
         userInfoVo.setId(userInfo.getUserId());
         userInfoVo.setUsername(userInfo.getUserName());
-        userInfoVo.setAvatar(Base64Utils.encode(userInfo.getAvatarPath()));
+        if(userInfo.getAvatarPath() == null){
+            userInfoVo.setAvatar("No Avatar");
+        }
+        else {
+            userInfoVo.setAvatar(Base64Utils.encode(userInfo.getAvatarPath()));
+        }
         userInfoVo.setSignature(userInfo.getUserSignature());
 
         return userInfoVo;

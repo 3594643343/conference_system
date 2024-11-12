@@ -66,7 +66,8 @@ public class MeetingController {
 
     @PostMapping("/uploadfile")
     @Operation(summary = "上传文件")
-    public Result uploadFile(@RequestBody UploadFileDto uploadFileDto){
+    public Result uploadFile(@RequestParam("file") MultipartFile file,@RequestParam("meetingNumber") String meetingNumber){
+        UploadFileDto uploadFileDto = new UploadFileDto(meetingNumber,file);
         return roomService.uploadFile(uploadFileDto);
     }
 

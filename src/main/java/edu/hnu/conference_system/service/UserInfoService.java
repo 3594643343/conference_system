@@ -3,8 +3,7 @@ package edu.hnu.conference_system.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import edu.hnu.conference_system.domain.UserInfo;
 import edu.hnu.conference_system.result.Result;
-import edu.hnu.conference_system.vo.LoginVo;
-import edu.hnu.conference_system.vo.UserBriefVo;
+import edu.hnu.conference_system.vo.UserInfoVo;
 
 import java.util.Map;
 
@@ -17,7 +16,7 @@ public interface UserInfoService extends IService<UserInfo> {
 
     Result passLogin(Map<String, String> request);
 
-    UserBriefVo buildUserBriefVo(Long id);
+    UserInfoVo buildUserInfoVo(Long id);
 
     /*Result codeLogin(LoginDto loginDto);*/
 

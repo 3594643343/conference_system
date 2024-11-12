@@ -7,12 +7,12 @@ import edu.hnu.conference_system.domain.UserInfo;
 import edu.hnu.conference_system.dto.UserDto;
 import edu.hnu.conference_system.mapper.UserInfoMapper;
 import edu.hnu.conference_system.result.Result;
+import edu.hnu.conference_system.utils.Base64Utils;
 import edu.hnu.conference_system.vo.LoginVo;
-import edu.hnu.conference_system.vo.UserBriefVo;
+import edu.hnu.conference_system.vo.UserInfoVo;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import edu.hnu.conference_system.service.UserInfoService;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,23 +69,23 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         }
     }
 
-
     /**
-     * 生成一个UserBriefVo
+     * 生成一个UserInfoVo
      * @param id
      * @return
      */
     @Override
-    public UserBriefVo buildUserBriefVo(Long id) {
-        UserBriefVo userBriefVo = new UserBriefVo();
+    public UserInfoVo buildUserInfoVo(Long id) {
+        UserInfoVo userInfoVo = new UserInfoVo();
 
         UserInfo userInfo = userMapper.selectOne(
                 new QueryWrapper<UserInfo>().eq("user_id",id));
-        userBriefVo.setId(userInfo.getUserId());
-        userBriefVo.setUsername(userInfo.getUserName());
-        userBriefVo.setAvatar(MultipartFile);
+        userInfoVo.setId(userInfo.getUserId());
+        userInfoVo.setUsername(userInfo.getUserName());
+        userInfoVo.setAvatar(Base64Utils.encode(userInfo.getAvatarPath()));
+        userInfoVo.setSignature(userInfo.getUserSignature());
 
-        return userBriefVo;
+        return userInfoVo;
     }
 
 

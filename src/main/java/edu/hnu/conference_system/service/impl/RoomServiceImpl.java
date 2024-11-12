@@ -8,13 +8,11 @@ import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.RoomService;
 import edu.hnu.conference_system.service.UserInMeetingService;
 import edu.hnu.conference_system.service.UserInfoService;
-import edu.hnu.conference_system.vo.UserBriefVo;
+import edu.hnu.conference_system.vo.UserInfoVo;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -155,20 +153,23 @@ public class RoomServiceImpl implements RoomService {
 
 
     /**
-     * 返回在会者简要信息(头像与昵称)用于侧边显示
+     * 传入会议号
+     * 返回在会者信息(id 头像 昵称 个性签名)用于侧边显示
      * @return
      */
     @Override
-    public Result getUserBrief(Map<String,String> request) {
-        List<UserBriefVo> userBriefVos = new ArrayList<>();
+    public Result getUserInfo(Map<String,String> request) {
+        List<UserInfoVo> userInfoVos = new ArrayList<>();
         for (Room room : roomList) {
             if(room.getMeetingNumber().equals(request.get("meetingNumber"))) {
                 for(User user : room.getMembersOn()) {
-                    userBriefVos.add(userInfoService.buildUserBriefVo(user.getId()));
+                    userInfoVos.add(userInfoService.buildUserInfoVo(user.getId()));
                 }
                 break;
             }
         }
-        return Result.success(userBriefVos);
+        return Result.success(userInfoVos);
     }
+
+
 }

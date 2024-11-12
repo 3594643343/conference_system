@@ -21,5 +21,7 @@ public interface RoomService {
 
     void saveAllUserInMeeting(Room room);
 
-    Result getUserBrief(Map<String,String> request);
+    Result getUserInfo(Map<String,String> request);
+
+    //Result getUserDetail(Map<String,String> request);
 }

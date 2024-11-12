@@ -32,8 +32,8 @@ public class MeetingController {
     }
 
     @GetMapping("/userlist")
-    @Operation(summary = "在会用户预览(头像,昵称)")
-    public Result getUserBrief(@RequestBody Map<String,String> request){
-        return roomService.getUserBrief(request);
+    @Operation(summary = "在会用户信息(id、头像,昵称,个性签名)")
+    public Result getUserInfo(@RequestBody Map<String,String> request){
+        return roomService.getUserInfo(request);
     }
 }

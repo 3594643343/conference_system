@@ -30,6 +30,8 @@ public class Result<T> implements Serializable {
      */
     private T data;
 
+
+
     public static <T> Result<T> success() {
         Result<T> result = new Result<>();
         result.setTime(LocalDateTime.now());
@@ -42,6 +44,13 @@ public class Result<T> implements Serializable {
         result.setTime(LocalDateTime.now());
         result.setCode(1);
         result.setData(data);
+        return result;
+    }
+    public static <T> Result<T> success(String message) {
+        Result<T> result = new Result<>();
+        result.setTime(LocalDateTime.now());
+        result.setCode(1);
+        result.setMsg(message);
         return result;
     }
 

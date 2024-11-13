@@ -60,6 +60,9 @@ public class Meeting implements Serializable {
      * 会议号
      */
     private String meetingNumber;
+    private String meetingTheme; // 会议主题
+    private LocalDateTime startTime; // 开始时间
+    private LocalDateTime endTime; // 结束时间
     /**
      * 会议密码  快速会议密码为"0"
      */
@@ -94,6 +97,72 @@ public class Meeting implements Serializable {
      * 会议状态   未开始 off  进行中 on   已结束 end
      */
     private String meetingState;
+    private User organizer; // 组织者
+
+    // Getters and Setters
+    public Long getId() {
+        return meetingId;
+    }
+
+    public void setId(Long id) {
+        this.meetingId = id;
+    }
+
+    public String getMeetingNumber() {
+        return meetingNumber;
+    }
+
+    public void setMeetingNumber(String meetingNumber) {
+        this.meetingNumber = meetingNumber;
+    }
+
+    public String getMeetingPassword() {
+        return meetingPassword;
+    }
+
+    public void setMeetingPassword(String meetingPassword) {
+        this.meetingPassword = meetingPassword;
+    }
+
+    public String getMeetingName() {
+        return meetingName;
+    }
+
+    public void setMeetingName(String meetingName) {
+        this.meetingName = meetingName;
+    }
+
+    public String getMeetingTheme() {
+        return meetingTheme;
+    }
+
+    public void setMeetingTheme(String meetingTheme) {
+        this.meetingTheme = meetingTheme;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public User getOrganizer() {
+        return organizer;
+    }
+
+    public void setOrganizer(User organizer) {
+        this.organizer = organizer;
+    }
 
     public Meeting(String meetingName,String meetingNumber,String meetingPassword,
                    Long createrId,LocalDateTime startTime,LocalDateTime endTime, Integer defaultPermission)
@@ -196,4 +265,5 @@ public class Meeting implements Serializable {
         sb.append("]");
         return sb.toString();
     }
+
 }

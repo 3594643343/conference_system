@@ -3,6 +3,7 @@ package edu.hnu.conference_system.controller;
 
 
 import edu.hnu.conference_system.result.Result;
+import edu.hnu.conference_system.vo.EmailLoginVo;
 import edu.hnu.conference_system.service.UserInfoService;
 import edu.hnu.conference_system.vo.LoginVo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,11 +28,25 @@ public class LoginController {
     /*
     用户 用户名密码登录
      */
-    @PostMapping()
-    @Operation(summary = "密码登录")
+    @PostMapping()//指定该方法处理post请求
+    @Operation(summary = "密码登录")//使用swagger注解来描述该方法功能
     public Result namePassLogin(@RequestBody Map<String, String> request){
         return userInfoService.passLogin(request);
+    }//接收客户端发送的json数据，并将其解析为一个map对象，方法体调用userInfoService.passLogin(result)
+    //将结果返回客户端
+
+
+    /*
+    用户 邮箱和验证码登录
+    */
+    @PostMapping("/loginbyemail")
+    @Operation(summary = "邮箱和验证码登录")
+    public Result emailLogin(@RequestBody EmailLoginVo emailLoginVo) {
+        log.info("邮箱和验证码登录 emailLoginVo = {}", emailLoginVo);
+        return userInfoService.emailLogin(emailLoginVo);
     }
+
+
 
 
     /*

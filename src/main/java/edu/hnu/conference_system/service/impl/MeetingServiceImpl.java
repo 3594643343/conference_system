@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import edu.hnu.conference_system.domain.Meeting;
+import edu.hnu.conference_system.domain.Room;
 import edu.hnu.conference_system.domain.User;
 import edu.hnu.conference_system.dto.BookMeetingDto;
 import edu.hnu.conference_system.holder.UserHolder;
@@ -13,15 +14,18 @@ import edu.hnu.conference_system.mapper.MeetingMapper;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.MeetingService;
 import edu.hnu.conference_system.service.RoomService;
+import edu.hnu.conference_system.service.ScheduleService;
+import edu.hnu.conference_system.service.UserInfoService;
 import edu.hnu.conference_system.vo.CreateMeetingVo;
+import edu.hnu.conference_system.vo.MeetingInfoVo;
+import edu.hnu.conference_system.vo.UserInfoVo;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static edu.hnu.conference_system.service.impl.UserInfoServiceImpl.userList;
 
@@ -34,11 +38,14 @@ import static edu.hnu.conference_system.service.impl.UserInfoServiceImpl.userLis
 @Service
 public class MeetingServiceImpl extends ServiceImpl<MeetingMapper, Meeting>
     implements MeetingService {
+    static List<Room> roomList = new ArrayList<>();
 
     @Resource
     MeetingMapper meetingMapper;
     @Resource
     RoomService roomService;
+    @Resource
+    MeetingService meetingService;
 
     @Override
     public Result bookMeeting(BookMeetingDto bookMeetingDto) {
@@ -171,6 +178,48 @@ public class MeetingServiceImpl extends ServiceImpl<MeetingMapper, Meeting>
 
         }
 
+    }
+    private List<Meeting> meetingList = new ArrayList<>();
+
+    @Override
+    public MeetingInfoVo buildMeetingInfoVo(Meeting meeting) {
+        if (meeting == null) {
+            return null;
+        }
+
+        MeetingInfoVo meetingInfoVo = new MeetingInfoVo();
+        meetingInfoVo.setMeetingName(meeting.getMeetingName());
+        meetingInfoVo.setMeetingTheme(meeting.getMeetingTheme());
+        meetingInfoVo.setStartTime(meeting.getStartTime());
+        meetingInfoVo.setEndTime(meeting.getEndTime());
+
+        return meetingInfoVo;
+    }
+
+    @Override
+    public void addMeeting(Meeting meeting) {
+        meetingList.add(meeting);
+    }
+
+    @Override
+    public List<Meeting> getUserMeetings(User user) {
+        return meetingList.stream()
+                .filter(meeting -> meeting.getOrganizer().getId().equals(user.getId()))
+                .collect(Collectors.toList());
+    }
+    @Override
+    public boolean validateMeeting(String meetingNumber, String meetingPassword) {
+        return meetingList.stream()
+                .anyMatch(meeting -> meeting.getMeetingNumber().equals(meetingNumber) && meeting.getMeetingPassword().equals(meetingPassword));
+    }
+
+    /**
+     * 从日程列表直接加入会议
+     * @return
+     */
+    @Override
+    public Result joinscheduleMeeting() {
+            return Result.success("加入日程会议成功");
     }
 
 }

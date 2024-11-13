@@ -314,6 +314,10 @@ public class RoomServiceImpl implements RoomService {
             FileDto fileDto = new FileDto(meetingId,fileName,fileType,path);
             fileService.insertFile(fileDto);
 
+            //将文件转化成图片以便传输, 转换后得到的是一个文件夹,里面以1.jpg 2.jpg这样命名
+
+
+
             return Result.success("上传成功!");
         } catch (Exception e) {
             throw new RuntimeException(e);

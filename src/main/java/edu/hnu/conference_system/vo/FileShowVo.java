@@ -25,7 +25,7 @@ public class FileShowVo {
     /**
      * 页数
      */
-    private String pageNumber;
+    private int pageNumber;
     /**
      * 文件转化成的图片数组
      */

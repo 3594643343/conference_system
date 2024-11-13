@@ -38,5 +38,7 @@ public interface RoomService {
 
     Result uploadFile(UploadFileDto uploadFileDto);
 
+    void pushFileToAll(String UploadUserName,String fileName,String path) throws Exception;
+
     //Result getUserDetail(Map<String,String> request);
 }

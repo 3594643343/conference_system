@@ -7,6 +7,9 @@ import edu.hnu.conference_system.dto.*;
 import edu.hnu.conference_system.holder.UserHolder;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.*;
+import edu.hnu.conference_system.utils.Base64Utils;
+import edu.hnu.conference_system.utils.FileToPicUtils;
+import edu.hnu.conference_system.vo.FileShowVo;
 import edu.hnu.conference_system.vo.UserInfoVo;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
@@ -314,14 +317,48 @@ public class RoomServiceImpl implements RoomService {
             FileDto fileDto = new FileDto(meetingId,fileName,fileType,path);
             fileService.insertFile(fileDto);
 
-            //将文件转化成图片以便传输, 转换后得到的是一个文件夹,里面以1.jpg 2.jpg这样命名
-
+            pushFileToAll(UserHolder.getUserInfo().getUserName(), fileName,path);
 
 
             return Result.success("上传成功!");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * 将上传的文件推送给所有人
+     * @param path
+     */
+    @Override
+    public void pushFileToAll(String UploadUserName,String fileName,String path) throws Exception {
+        FileShowVo fileShowVo = new FileShowVo();
+        fileShowVo.setFileName(fileName);
+        fileShowVo.setUploadUserName(UploadUserName);
+
+        //将文件转化成图片以便传输, 转换后得到的是一个文件夹,里面以1.jpg 2.jpg这样命名
+        String fileType = fileName.substring(fileName.lastIndexOf(".")+1);
+        if(fileType.equals("ppt")){
+            fileShowVo.setPageNumber(FileToPicUtils.pptToPic(path));
+
+        }
+        else if (fileType.equals("pdf")) {
+            fileShowVo.setPageNumber(FileToPicUtils.pdfToPic(path));
+
+        }
+        else{
+            throw new RuntimeException("文件异常!");
+        }
+
+        String picsPath = path.substring(0,path.lastIndexOf("."))+"_PIC";
+        for(int i =0;i<fileShowVo.getPageNumber();i++){
+            String pic = picsPath+"/"+(i+1)+".jpg";
+            fileShowVo.getFilePics().add(Base64Utils.encode(pic));
+        }
+
+        //TODO 将文件推送给所有人
+
+
     }
 
 

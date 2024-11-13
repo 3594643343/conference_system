@@ -69,6 +69,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
             String token = generateTokenForUser(userDto);
             User user1 = new User(user.getUserId(),user.getUserName(),null,null,-1,null);
             userList.add(user1);
+            System.out.println("id:"+user1.getId()+"  用户名:"+user1.getUsername()+"登录");
             LoginVo loginVo = new LoginVo(user.getIsAdmin(),token);
             return Result.success(loginVo);
         }

@@ -69,6 +69,8 @@ public class RoomServiceImpl implements RoomService {
             }
         }
         roomList.add(room);
+        System.out.println("房间号:"+room.getMeetingNumber()+" 房间名:"+room.getRoomName()+" 上线");
+        System.out.println("当前共有"+roomList.size()+"个房间");
     }
 
     @Override
@@ -172,13 +174,16 @@ public class RoomServiceImpl implements RoomService {
         List<UserInfoVo> userInfoVos = new ArrayList<>();
         for (Room room : roomList) {
             if(room.getMeetingNumber().equals(request.get("meetingNumber"))) {
+                System.out.println("找到房间");
                 for(User user : room.getMembersOn()) {
+                    System.out.println("找到人");
                     userInfoVos.add(userInfoService.buildUserInfoVo(user.getId()));
                 }
                 break;
             }
         }
-        System.out.println("在会人:"+userInfoVos.size()+"/n"+"房间数"+roomList.size());
+        System.out.println("在线用户:"+userList.size()+" 人");
+        System.out.println("在会人:"+userInfoVos.size()+"  "+"房间数"+roomList.size());
         return Result.success(userInfoVos);
     }
 
@@ -332,9 +337,7 @@ public class RoomServiceImpl implements RoomService {
      */
     @Override
     public void pushFileToAll(String UploadUserName,String fileName,String path) throws Exception {
-        FileShowVo fileShowVo = new FileShowVo();
-        fileShowVo.setFileName(fileName);
-        fileShowVo.setUploadUserName(UploadUserName);
+        FileShowVo fileShowVo = new FileShowVo(fileName,UploadUserName,0,new ArrayList<>());
 
         //将文件转化成图片以便传输, 转换后得到的是一个文件夹,里面以1.jpg 2.jpg这样命名
         String fileType = fileName.substring(fileName.lastIndexOf(".")+1);

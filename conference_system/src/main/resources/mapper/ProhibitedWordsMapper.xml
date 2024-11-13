@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.hnu.conference_system.mapper.ProhibitedWordsMapper">
+
+    <resultMap id="BaseResultMap" type="edu.hnu.conference_system.domain.ProhibitedWords">
+            <id property="prohibitedWordId" column="prohibited_word_id" jdbcType="CHAR"/>
+            <result property="prohibitedWord" column="prohibited_word" jdbcType="CHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        prohibited_word_id,prohibited_word
+    </sql>
+</mapper>

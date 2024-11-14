@@ -9,6 +9,7 @@ import edu.hnu.conference_system.domain.Meeting;
 import edu.hnu.conference_system.domain.Room;
 import edu.hnu.conference_system.domain.User;
 import edu.hnu.conference_system.dto.BookMeetingDto;
+import edu.hnu.conference_system.dto.JoinMeetingDto;
 import edu.hnu.conference_system.holder.UserHolder;
 import edu.hnu.conference_system.mapper.MeetingMapper;
 import edu.hnu.conference_system.result.Result;
@@ -66,18 +67,17 @@ public class MeetingServiceImpl extends ServiceImpl<MeetingMapper, Meeting>
                 UserHolder.getUserId(), LocalDateTime.now() );
         meetingMapper.insert(meeting);
         //加入会议
-        Map<String, String> request = new HashMap<>();
-        request.put("meetingNumber", meetingNumber);
-        request.put("meetingPassword", null);
-        joinMeeting(request);
+
+        JoinMeetingDto joinMeetingDto = new JoinMeetingDto(meetingNumber,null);
+        joinMeeting(joinMeetingDto);
         return Result.success(new CreateMeetingVo(meetingNumber));
 
     }
 
     @Override
-    public Result joinMeeting(Map<String, String> request) {
-        String meetingNumber = request.get("meetingNumber");
-        String meetingPassword = request.get("meetingPassword");
+    public Result joinMeeting(JoinMeetingDto joinMeetingDto) {
+        String meetingNumber = joinMeetingDto.getMeetingNumber();
+        String meetingPassword = joinMeetingDto.getMeetingPassword();
 
         Meeting meeting = meetingMapper.selectOne(
                 new QueryWrapper<Meeting>().eq("meeting_number",meetingNumber));

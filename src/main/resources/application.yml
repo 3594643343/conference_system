@@ -8,8 +8,16 @@ spring:
     password: mysql94
     hikari:
       max-lifetime: 1800000 # 30min
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
 server:
   port: 8079
+files-upload-url:
+  avatar: D://code/files_upload/avatar
+  file: D://code/files_upload/file
+debug: false

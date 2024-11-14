@@ -3,15 +3,20 @@ package edu.hnu.conference_system.service.impl;
 import edu.hnu.conference_system.domain.Meeting;
 import edu.hnu.conference_system.domain.Room;
 import edu.hnu.conference_system.domain.User;
+import edu.hnu.conference_system.dto.*;
 import edu.hnu.conference_system.holder.UserHolder;
 import edu.hnu.conference_system.result.Result;
-import edu.hnu.conference_system.service.RoomService;
-import edu.hnu.conference_system.service.UserInMeetingService;
-import edu.hnu.conference_system.service.UserInfoService;
+import edu.hnu.conference_system.service.*;
+import edu.hnu.conference_system.utils.Base64Utils;
+import edu.hnu.conference_system.utils.FileToPicUtils;
+import edu.hnu.conference_system.vo.FileShowVo;
 import edu.hnu.conference_system.vo.UserInfoVo;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,11 +34,20 @@ public class RoomServiceImpl implements RoomService {
     static List<Room> roomList = new ArrayList<>();
 
 
+    @Value("${files-upload-url.file}")
+    private String filePath;
+
     @Resource
     UserInMeetingService userInMeetingService;
 
     @Resource
     UserInfoService userInfoService;
+
+    @Resource
+    FileService fileService;
+
+    @Resource
+    FileUploadService fileUploadService;
 
     /**
      * 实例化一个Room,将room加入到roomlist中
@@ -55,6 +69,8 @@ public class RoomServiceImpl implements RoomService {
             }
         }
         roomList.add(room);
+        System.out.println("房间号:"+room.getMeetingNumber()+" 房间名:"+room.getRoomName()+" 上线");
+        System.out.println("当前共有"+roomList.size()+"个房间");
     }
 
     @Override
@@ -106,9 +122,7 @@ public class RoomServiceImpl implements RoomService {
 
                 //记录参会者
                 saveAllUserInMeeting(room);
-                /**
-                 * 记录纪要等,还没写
-                 */
+                //TODO 记录会议音频、纪要等到数据库
 
                 //为meeting赋值
                 meeting.setMeetingNumber(meetingNumber);
@@ -118,9 +132,7 @@ public class RoomServiceImpl implements RoomService {
                 );
                 meeting.setParticipantCount(room.getMembersOn().size());
                 meeting.setMeetingState("end");
-                /**
-                 * 纪要id等,还没写
-                 */
+                //TODO 保存会议音频、纪要等id到meeting表
 
 
                 //将要关闭的房间中的用户与会议相关的变量清空并全踢出房间
@@ -162,13 +174,194 @@ public class RoomServiceImpl implements RoomService {
         List<UserInfoVo> userInfoVos = new ArrayList<>();
         for (Room room : roomList) {
             if(room.getMeetingNumber().equals(request.get("meetingNumber"))) {
+                System.out.println("找到房间");
                 for(User user : room.getMembersOn()) {
+                    System.out.println("找到人");
                     userInfoVos.add(userInfoService.buildUserInfoVo(user.getId()));
                 }
                 break;
             }
         }
+        System.out.println("在线用户:"+userList.size()+" 人");
+        System.out.println("在会人:"+userInfoVos.size()+"  "+"房间数"+roomList.size());
         return Result.success(userInfoVos);
+    }
+
+    /**
+     * 禁言
+     * @param muteDto
+     * @return
+     */
+    @Override
+    public Result mute(MuteDto muteDto) {
+
+        for(Room room : roomList) {
+            if(room.getMeetingNumber().equals(muteDto.getMeetingNumber())) {
+                for(User user : room.getMembersOn()) {
+                    if(user.getId().equals(muteDto.getUserId())) {
+                        //TODO 禁言的实现
+                        return Result.success("已禁言"+user.getUsername());
+                    }
+                }
+                return Result.error("用户解析错误!");
+            }
+        }
+        return Result.error("房间解析错误!");
+    }
+
+    /**
+     * 解除禁言
+     * @param muteDto
+     * @return
+     */
+    @Override
+    public Result disMute(MuteDto muteDto) {
+
+        for(Room room : roomList) {
+            if(room.getMeetingNumber().equals(muteDto.getMeetingNumber())) {
+                for(User user : room.getMembersOn()) {
+                    if(user.getId().equals(muteDto.getUserId())) {
+                        //TODO 解除禁言的实现
+                        return Result.success("已解除"+user.getUsername()+"禁言");
+                    }
+                }
+                return Result.error("用户解析错误!");
+            }
+        }
+        return Result.error("房间解析错误!");
+    }
+
+
+    /**
+     *修改用户权限
+     * @param pmChangeDto
+     * @return
+     */
+    @Override
+    public Result permissionChange(PmChangeDto pmChangeDto) {
+        for(Room room : roomList) {
+            if(room.getMeetingNumber().equals(pmChangeDto.getMeetingNumber())) {
+                for(User user : room.getMembersOn()) {
+                    if(user.getId().equals(pmChangeDto.getId())) {
+                        user.setMeetingPermission(pmChangeDto.getPermission());
+                        return Result.success("成功将"+user.getUsername()+"设置为"+
+                                (pmChangeDto.getPermission()==0?"参会者":"管理员"));
+                    }
+                }
+                return Result.error("用户解析错误!");
+            }
+        }
+        return Result.error("房间解析错误!");
+    }
+
+    /**
+     * 踢人
+     * @param kickDto
+     * @return
+     */
+    @Override
+    public Result kickOneOut(KickDto kickDto) {
+        for(Room room : roomList) {
+            if(room.getMeetingNumber().equals(kickDto.getMeetingNumber())) {
+                for(User user : room.getMembersOn()) {
+                    if(user.getId().equals(kickDto.getId())) {
+                        //将离开会议的user与会议相关的变量清空,再把它从这个房间里踢出
+                        user.setMeetingNumber(null);
+                        user.setMeetingId(null);
+                        user.setMeetingPermission(-1);
+                        room.getMembersOn().remove(user);
+                        return Result.success("成功踢出"+user.getUsername());
+                    }
+                }
+                return Result.error("用户解析错误!");
+            }
+        }
+        return Result.error("房间解析错误!");
+    }
+
+    /**
+     * 文件上传
+     * @param uploadFileDto
+     * @return
+     */
+    @Override
+    public Result uploadFile(UploadFileDto uploadFileDto) {
+        String meetingNumber = uploadFileDto.getMeetingNumber();
+        MultipartFile file = uploadFileDto.getFile();
+
+        String fileName = file.getOriginalFilename();
+        String fileType = fileName.substring(fileName.lastIndexOf(".")+1);
+        String fileNameWithoutExt = fileName.substring(0,fileName.lastIndexOf("."));
+
+
+        /*创建存放文件的文件夹,格式如:
+        D://file/演示文件_JDK234Io9_小王
+        */
+        String dirPath = filePath + "/"+fileNameWithoutExt+"_"+meetingNumber+"_"+UserHolder.getUserInfo().getUserName();
+        File fileDir = new File(dirPath);
+        try{
+            fileDir.mkdirs();
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+
+        String path = dirPath+"/"+fileName;
+        try {
+            //byte[] bytes = file.getBytes();
+            File newFile = new File(path);
+            file.transferTo(newFile);
+
+            Long meetingId = null;
+            for (Room room : roomList) {
+                if(room.getMeetingNumber().equals(meetingNumber)) {
+                    meetingId = room.getMeetingId();
+                }
+            }
+
+            //文件数据库记录该文件
+            FileDto fileDto = new FileDto(meetingId,fileName,fileType,path);
+            fileService.insertFile(fileDto);
+
+            pushFileToAll(UserHolder.getUserInfo().getUserName(), fileName,path);
+
+
+            return Result.success("上传成功!");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 将上传的文件推送给所有人
+     * @param path
+     */
+    @Override
+    public void pushFileToAll(String UploadUserName,String fileName,String path) throws Exception {
+        FileShowVo fileShowVo = new FileShowVo(fileName,UploadUserName,0,new ArrayList<>());
+
+        //将文件转化成图片以便传输, 转换后得到的是一个文件夹,里面以1.jpg 2.jpg这样命名
+        String fileType = fileName.substring(fileName.lastIndexOf(".")+1);
+        if(fileType.equals("ppt")){
+            fileShowVo.setPageNumber(FileToPicUtils.pptToPic(path));
+
+        }
+        else if (fileType.equals("pdf")) {
+            fileShowVo.setPageNumber(FileToPicUtils.pdfToPic(path));
+
+        }
+        else{
+            throw new RuntimeException("文件异常!");
+        }
+
+        String picsPath = path.substring(0,path.lastIndexOf("."))+"_PIC";
+        for(int i =0;i<fileShowVo.getPageNumber();i++){
+            String pic = picsPath+"/"+(i+1)+".jpg";
+            fileShowVo.getFilePics().add(Base64Utils.encode(pic));
+        }
+
+        //TODO 将文件推送给所有人
+
+
     }
 
 

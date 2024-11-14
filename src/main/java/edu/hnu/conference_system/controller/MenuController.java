@@ -2,6 +2,7 @@ package edu.hnu.conference_system.controller;
 
 
 import edu.hnu.conference_system.dto.BookMeetingDto;
+import edu.hnu.conference_system.dto.JoinMeetingDto;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.MeetingService;
 import edu.hnu.conference_system.service.RoomService;
@@ -35,7 +36,7 @@ public class MenuController {
 
     @PostMapping("/join")
     @Operation(summary = "加入会议")
-    public Result joinMeeting(@RequestBody Map<String,String> request){
-        return meetingService.joinMeeting(request);
+    public Result joinMeeting(@RequestBody JoinMeetingDto joinMeetingDto) {
+        return meetingService.joinMeeting(joinMeetingDto);
     }
 }

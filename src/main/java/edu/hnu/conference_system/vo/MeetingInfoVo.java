@@ -14,9 +14,9 @@ public class MeetingInfoVo {
      */
     private String meetingname;
     /**
-     * 会议主题
+     * 会议创建者用户名
      */
-    private String meetingtheme;
+    private String meetingHost;
     /**
      * 会议开始时间
      */
@@ -26,36 +26,5 @@ public class MeetingInfoVo {
      */
     private LocalDateTime endTime;
 
-    // Getters and Setters
-    public String getMeetingName() {
-        return meetingname;
-    }
 
-    public void setMeetingName(String meetingName) {
-        this.meetingname = meetingName;
-    }
-
-    public String getMeetingTheme() {
-        return meetingtheme;
-    }
-
-    public void setMeetingTheme(String meetingTheme) {
-        this.meetingtheme = meetingTheme;
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
 }

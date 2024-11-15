@@ -2,24 +2,23 @@ package edu.hnu.conference_system.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import edu.hnu.conference_system.domain.Meeting;
+import edu.hnu.conference_system.domain.Schedule;
 import edu.hnu.conference_system.dto.BookMeetingDto;
+import edu.hnu.conference_system.dto.JoinMeetingDto;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.vo.MeetingInfoVo;
 import edu.hnu.conference_system.vo.UserInfoVo;
 
 import java.util.Map;
 
-public interface ScheduleService extends IService<Meeting> {
+public interface ScheduleService extends IService<Schedule> {
 
-    Result bookMeeting(BookMeetingDto bookMeetingDto);
 
-    Result quickMeeting();
+    Result show(Long userId);
 
-    Result joinMeeting(Map<String,String> request);
+    Result add(Long userId, JoinMeetingDto joinMeetingDto);
 
-    void startMeeting(Meeting meeting);
+    Result join(Long meetingId,String meetingnumber);
 
-    void endMeeting(Meeting meet);
-
-    void leaveMeeting();
+    Result cancel(Long userId, Long meetingId);
 }

@@ -39,12 +39,12 @@ public class LoginController {
     /*
     用户 邮箱和验证码登录
     */
-    @PostMapping("/loginbyemail")
+    /*@PostMapping("/loginbyemail")
     @Operation(summary = "邮箱和验证码登录")
     public Result emailLogin(@RequestBody EmailLoginVo emailLoginVo) {
         log.info("邮箱和验证码登录 emailLoginVo = {}", emailLoginVo);
         return userInfoService.emailLogin(emailLoginVo);
-    }
+    }*/
 
 
 

@@ -24,7 +24,8 @@ public interface UserInfoService extends IService<UserInfo> {
     long userRegister(String userName, String userPassword, String checkPassword);
 
     UserInfoVo buildUserInfoVo(Long id);
-    User getUserById(Long userId);
+
+    String getNameById(Long userId);
 
     //UserBriefVo buildUserBriefVo(Long id);
 

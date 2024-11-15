@@ -1,5 +1,6 @@
 package edu.hnu.conference_system.controller;
 
+import edu.hnu.conference_system.dto.RegisterDto;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.UserInfoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,10 +24,10 @@ public class RegisterController {
     /*
      * 用户注册
      */
-    public Result<Long> register(@RequestBody Map<String, String> request) {
-        String userName = request.get("userName");
-        String userPassword = request.get("userPassword");
-        String checkPassword = request.get("checkPassword");
+    public Result<Long> register(@RequestBody RegisterDto registerDto) {
+        String userName = registerDto.getUserName();
+        String userPassword = registerDto.getUserPassword();
+        String checkPassword = registerDto.getCheckPassword();
 
         // 调用服务层方法进行注册
         long userId = userInfoService.userRegister(userName, userPassword, checkPassword);

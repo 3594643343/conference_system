@@ -19,6 +19,7 @@ import edu.hnu.conference_system.service.ScheduleService;
 import edu.hnu.conference_system.service.UserInfoService;
 import edu.hnu.conference_system.vo.CreateMeetingVo;
 import edu.hnu.conference_system.vo.MeetingInfoVo;
+import edu.hnu.conference_system.vo.ScheduleShowVo;
 import edu.hnu.conference_system.vo.UserInfoVo;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -46,7 +47,7 @@ public class MeetingServiceImpl extends ServiceImpl<MeetingMapper, Meeting>
     @Resource
     RoomService roomService;
     @Resource
-    MeetingService meetingService;
+    UserInfoService userInfoService;
 
     @Override
     public Result bookMeeting(BookMeetingDto bookMeetingDto) {
@@ -179,49 +180,87 @@ public class MeetingServiceImpl extends ServiceImpl<MeetingMapper, Meeting>
         }
 
     }
-    private List<Meeting> meetingList = new ArrayList<>();
 
     @Override
-    public MeetingInfoVo buildMeetingInfoVo(Meeting meeting) {
-        if (meeting == null) {
-            return null;
+    public ScheduleShowVo buildSceduleShowVoById(Long meetingId) {
+        Meeting meeting = meetingMapper.selectOne(
+                new QueryWrapper<Meeting>().eq("meeting_id", meetingId)
+        );
+        ScheduleShowVo scheduleShowVo = new ScheduleShowVo();
+
+        scheduleShowVo.setMeetingName(meeting.getMeetingName());
+        scheduleShowVo.setMeetingHost(userInfoService.getNameById(meeting.getUserId()));
+        scheduleShowVo.setMeetingStartTime(meeting.getMeetingStartTime());
+        scheduleShowVo.setMeetingEndTime(meeting.getMeetingEndTime());
+        scheduleShowVo.setMeetingState(meeting.getMeetingState());
+        scheduleShowVo.setMeetingId(meetingId);
+        scheduleShowVo.setMeetingNumber(meeting.getMeetingNumber());
+        return scheduleShowVo;
+    }
+
+    @Override
+    public Long validate(String meetingNumber, String meetingPassword) {
+        Meeting meeting = meetingMapper.selectOne(
+                new QueryWrapper<Meeting>().eq("meeting_number", meetingNumber)
+        );
+        if(meeting == null){
+            return (long) -1;
         }
-
-        MeetingInfoVo meetingInfoVo = new MeetingInfoVo();
-        meetingInfoVo.setMeetingName(meeting.getMeetingName());
-        meetingInfoVo.setMeetingTheme(meeting.getMeetingTheme());
-        meetingInfoVo.setStartTime(meeting.getStartTime());
-        meetingInfoVo.setEndTime(meeting.getEndTime());
-
-        return meetingInfoVo;
+        else if(!meeting.getMeetingPassword().equals(meetingPassword)){
+            return (long) -1;
+        }
+        else return meeting.getMeetingId();
     }
+
+
 
     @Override
-    public void addMeeting(Meeting meeting) {
-        meetingList.add(meeting);
-    }
+    public Result joinFromSchedule(String meetingNumber) {
+        Meeting meeting = meetingMapper.selectOne(
+                new QueryWrapper<Meeting>().eq("meeting_number",meetingNumber));
+        if(meeting == null){
+            return Result.error("不存在该会议!");
+        }
+        else if(Objects.equals(meeting.getMeetingState(), "off")){
+            if(UserHolder.getUserId().equals(meeting.getUserId())){
+                //用户为会议创建者, 在用户list中修改相关信息
+                for(User user:userList){
+                    if(Objects.equals(user.getId(), UserHolder.getUserId())){
+                        user.setMeetingId(meeting.getMeetingId());
+                        user.setMeetingNumber(meetingNumber);
+                        user.setMeetingPermission(2);
+                    }
+                }
+                //创建者加入会议, 开始会议
+                startMeeting(meeting);
 
-    @Override
-    public List<Meeting> getUserMeetings(User user) {
-        return meetingList.stream()
-                .filter(meeting -> meeting.getOrganizer().getId().equals(user.getId()))
-                .collect(Collectors.toList());
+                return Result.success("加入会议成功!");
+            }
+            else{
+                return Result.error("会议尚未开始!");
+            }
+        }
+        else if(Objects.equals(meeting.getMeetingState(), "on")){
+            //用户为会议参与者, 在用户list中修改相关信息
+            for(User user:userList){
+                if(Objects.equals(user.getId(), UserHolder.getUserId())){
+                    user.setMeetingId(meeting.getMeetingId());
+                    user.setMeetingNumber(meetingNumber);
+                    user.setMeetingPermission(meeting.getDefaultPermission());
+                    //加入会议房间
+                    roomService.joinRoom(meeting.getMeetingNumber(),user);
+                    break;
+                }
+            }
+            return Result.success("加入会议成功!");
+        }
+        else if(Objects.equals(meeting.getMeetingState(), "end")){
+            return Result.error("会议已结束!");
+        }
+        else{
+            return Result.error("发生未知错误!");
+        }
     }
-    @Override
-    public boolean validateMeeting(String meetingNumber, String meetingPassword) {
-        return meetingList.stream()
-                .anyMatch(meeting -> meeting.getMeetingNumber().equals(meetingNumber) && meeting.getMeetingPassword().equals(meetingPassword));
-    }
-
-    /**
-     * 从日程列表直接加入会议
-     * @return
-     */
-    @Override
-    public Result joinscheduleMeeting() {
-            return Result.success("加入日程会议成功");
-    }
-
 }
 
 

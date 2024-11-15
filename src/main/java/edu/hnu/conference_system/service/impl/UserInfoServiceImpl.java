@@ -40,13 +40,6 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
      * 存放在线的用户
      */
     static List<User> userList = new ArrayList<>();
-    @Override
-    public User getUserById(Long userId) {
-        Optional<User> user = userList.stream()
-                .filter(u -> u.getId().equals(userId))
-                .findFirst();
-        return user.orElse(null);
-    }
 
     @Resource
     UserInfoMapper userMapper;
@@ -55,6 +48,9 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     public Result passLogin(Map<String, String> request) {
         String name = request.get("userName");
         String email = request.get("userEmail");
+        if(name == null && email == null){
+            return Result.error("请输入用户名和密码!");
+        }
         String loginStr = (name == null) ? email : name;
         String col = (name == null) ? "user_email" : "user_name";
         String password = EncryptedPassword(request.get("userPassword"));
@@ -153,7 +149,8 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         if (!userPassword.equals(checkPassword)) {
             return -1;
         }
-        //2.加密（暂且不做）
+        //2.加密
+        userPassword = EncryptedPassword(userPassword);
         //3.插入数据
         UserInfo userInfo = new UserInfo();
         userInfo.setUserName(userName);
@@ -164,6 +161,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         }
         return userInfo.getUserId();
     }
+
     public UserInfoVo buildUserInfoVo(Long id) {
         UserInfoVo userInfoVo = new UserInfoVo();
 
@@ -175,6 +173,12 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         userInfoVo.setSignature(userInfo.getUserSignature());
 
         return userInfoVo;
+    }
+
+    @Override
+    public String getNameById(Long userId) {
+        UserInfo u = userMapper.selectById(userId);
+        return u.getUserName();
     }
 
 

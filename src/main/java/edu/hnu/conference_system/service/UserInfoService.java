@@ -2,6 +2,8 @@ package edu.hnu.conference_system.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import edu.hnu.conference_system.domain.UserInfo;
+import edu.hnu.conference_system.dto.PasswordChangeDto;
+import edu.hnu.conference_system.dto.UserInfoDto;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.vo.EmailLoginVo;
 import edu.hnu.conference_system.vo.LoginVo;
@@ -9,6 +11,7 @@ import edu.hnu.conference_system.vo.UserInfoVo;
 //import edu.hnu.conference_system.vo.UserBriefVo;
 import edu.hnu.conference_system.domain.User;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -26,6 +29,12 @@ public interface UserInfoService extends IService<UserInfo> {
     UserInfoVo buildUserInfoVo(Long id);
 
     String getNameById(Long userId);
+
+    Result changeUserInfo(UserInfoDto userInfoDto) throws IOException;
+
+    Result changePassword(PasswordChangeDto passwordChangeDto);
+
+    //Result getUserInfo(Long );
 
     //UserBriefVo buildUserBriefVo(Long id);
 

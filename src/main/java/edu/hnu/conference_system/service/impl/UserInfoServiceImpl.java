@@ -1,10 +1,14 @@
 package edu.hnu.conference_system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.hnu.conference_system.domain.User;
 import edu.hnu.conference_system.domain.UserInfo;
+import edu.hnu.conference_system.dto.PasswordChangeDto;
 import edu.hnu.conference_system.dto.UserDto;
+import edu.hnu.conference_system.dto.UserInfoDto;
+import edu.hnu.conference_system.holder.UserHolder;
 import edu.hnu.conference_system.mapper.UserInfoMapper;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.vo.EmailLoginVo;
@@ -14,13 +18,13 @@ import edu.hnu.conference_system.utils.Base64Utils;
 import edu.hnu.conference_system.vo.UserInfoVo;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import edu.hnu.conference_system.service.UserInfoService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,6 +44,9 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
      * 存放在线的用户
      */
     static List<User> userList = new ArrayList<>();
+
+    @Value("${files-upload-url.avatar}")
+    private String filePath;
 
     @Resource
     UserInfoMapper userMapper;
@@ -134,7 +141,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         }
         //账号不可重复（同一账号不可重复注册）
         QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("userAccount", userName);
+        queryWrapper.eq("user_name", userName);
         long count = userMapper.selectCount(queryWrapper);
         if (count > 0) {
             return -1;
@@ -179,6 +186,59 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     public String getNameById(Long userId) {
         UserInfo u = userMapper.selectById(userId);
         return u.getUserName();
+    }
+
+    @Override
+    public Result changeUserInfo(UserInfoDto userInfoDto) throws IOException {
+
+        UserInfo userInfo = userMapper.selectOne(
+                new QueryWrapper<UserInfo>().eq("user_name", userInfoDto.getUserName())
+        );
+
+        if(userInfo != null && !Objects.equals(userInfo.getUserId(), UserHolder.getUserId())){
+            return Result.error("已存在昵称为"+userInfo.getUserName()+"的用户");
+        }
+
+        //没有重复用户名
+        UserInfo newUserInfo = new UserInfo();
+        newUserInfo.setUserName(userInfoDto.getUserName());
+        newUserInfo.setUserSignature(userInfoDto.getSignature());
+
+        String oldAvatar = userInfo.getAvatarPath();
+        String newAvatar = null;
+        if(oldAvatar != null){
+            newAvatar = oldAvatar;
+        }
+        else{
+            newAvatar = filePath+userInfo.getUserId();
+        }
+        newUserInfo.setAvatarPath(newAvatar);
+
+        File file = new File(newAvatar);
+        try {
+            userInfoDto.getAvatar().transferTo(file);
+        }
+        catch (IOException e) {
+            throw new IOException(e.getMessage());
+        }
+
+        userMapper.update(newUserInfo,new UpdateWrapper<UserInfo>().eq("user_id", userInfo.getUserId()));
+        return Result.success("修改成功!");
+    }
+
+    @Override
+    public Result changePassword(PasswordChangeDto passwordChangeDto) {
+        if(!Objects.equals(passwordChangeDto.getNewPassword(), passwordChangeDto.getConfirmPassword())){
+            return Result.error("两次密码不一致!");
+        }
+        UserInfo user = userMapper.selectById(UserHolder.getUserId());
+        if(user.getUserPassword()!= EncryptedPassword(passwordChangeDto.getNewPassword())){
+            return Result.error("密码错误!");
+        }
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserPassword(EncryptedPassword(passwordChangeDto.getNewPassword()));
+        userMapper.update(userInfo,new UpdateWrapper<UserInfo>().eq("user_id", user.getUserId()));
+        return Result.success("修改成功!");
     }
 
 

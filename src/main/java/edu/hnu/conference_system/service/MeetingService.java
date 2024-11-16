@@ -7,6 +7,7 @@ import edu.hnu.conference_system.dto.BookMeetingDto;
 import edu.hnu.conference_system.dto.JoinMeetingDto;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.vo.MeetingInfoVo;
+import edu.hnu.conference_system.vo.RecordVo;
 import edu.hnu.conference_system.vo.ScheduleShowVo;
 
 import java.util.List;
@@ -38,4 +39,12 @@ public interface MeetingService extends IService<Meeting> {
 
 
     Result joinFromSchedule(String meetingNumber);
+
+    RecordVo buildRecordVoById(Long meetingId);
+
+    Long getMeetingMinutesId(Long meetingId);
+
+    Long getMeetingRecordId(Long meetingId);
+
+    Long getMeetingAudioId(Long meetingId);
 }

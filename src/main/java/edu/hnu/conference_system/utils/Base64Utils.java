@@ -9,17 +9,17 @@ import java.util.Base64;
 public class Base64Utils {
 
     /**
-     * 图片转Base64字符串
-     * @param image_path
+     * 文件转Base64字符串
+     * @param file_path
      * @return
      */
-    public static String encode(String image_path) {
+    public static String encode(String file_path) {
         String bs64 = null;
         FileInputStream in =null;
         byte[] buffer = null;
         Base64.Encoder encoder = Base64.getEncoder();
         try{
-            in = new FileInputStream(image_path);
+            in = new FileInputStream(file_path);
             buffer = new byte[in.available()];
             in.read(buffer);
             bs64 = encoder.encodeToString(buffer);
@@ -36,18 +36,18 @@ public class Base64Utils {
     }
 
     /**
-     * Base64字符串转图片
-     * @param input image_path
+     * Base64字符串转文件
+     * @param input file_path
      * @return
      */
-    public static void decode(String input,String image_path) throws IOException {
+    public static void decode(String input,String file_path) throws IOException {
         if(input.length() == 0){
             return;
         }
         Base64.Decoder decoder = Base64.getDecoder();
         OutputStream output = null;
         try {
-            output = new FileOutputStream(image_path);
+            output = new FileOutputStream(file_path);
 
             byte[] decodedBytes = decoder.decode(input);
             for(int i = 0; i < decodedBytes.length; i++){

@@ -17,10 +17,7 @@ import edu.hnu.conference_system.service.MeetingService;
 import edu.hnu.conference_system.service.RoomService;
 import edu.hnu.conference_system.service.ScheduleService;
 import edu.hnu.conference_system.service.UserInfoService;
-import edu.hnu.conference_system.vo.CreateMeetingVo;
-import edu.hnu.conference_system.vo.MeetingInfoVo;
-import edu.hnu.conference_system.vo.ScheduleShowVo;
-import edu.hnu.conference_system.vo.UserInfoVo;
+import edu.hnu.conference_system.vo.*;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
@@ -260,6 +257,41 @@ public class MeetingServiceImpl extends ServiceImpl<MeetingMapper, Meeting>
         else{
             return Result.error("发生未知错误!");
         }
+    }
+
+    @Override
+    public RecordVo buildRecordVoById(Long meetingId) {
+        RecordVo recordVo = new RecordVo();
+        recordVo.setParticipants(new ArrayList<>());
+        Meeting meeting = meetingMapper.selectOne(
+                new QueryWrapper<Meeting>().eq("meeting_id", meetingId)
+        );
+        recordVo.setMeetingName(meeting.getMeetingName());
+        recordVo.setMeetingHost(userInfoService.getNameById(meeting.getUserId()));
+        recordVo.setMeetingStartTime(meeting.getMeetingStartTime());
+        recordVo.setMeetingEndTime(meeting.getMeetingEndTime());
+        return recordVo;
+    }
+
+    @Override
+    public Long getMeetingMinutesId(Long meetingId) {
+        return meetingMapper.selectOne(
+                new QueryWrapper<Meeting>().eq("meeting_id",meetingId)
+        ).getMeetingsMinutesId();
+    }
+
+    @Override
+    public Long getMeetingRecordId(Long meetingId) {
+        return meetingMapper.selectOne(
+                new QueryWrapper<Meeting>().eq("meeting_id",meetingId)
+        ).getRecordId();
+    }
+
+    @Override
+    public Long getMeetingAudioId(Long meetingId) {
+        return meetingMapper.selectOne(
+                new QueryWrapper<Meeting>().eq("meeting_id",meetingId)
+        ).getMeetingAudioId();
     }
 }
 

@@ -14,4 +14,5 @@ public interface UserInMeetingService extends IService<UserInMeeting> {
 
     void saveAllUserInMeeting(Long meetingId, List<Long> userIds);
 
+    List<Long> getUsersIdsFromMeetingId(Long meetingId);
 }

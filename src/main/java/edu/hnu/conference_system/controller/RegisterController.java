@@ -24,6 +24,8 @@ public class RegisterController {
     /*
      * 用户注册
      */
+    @PostMapping
+    @Operation(summary = "用户注册")
     public Result<Long> register(@RequestBody RegisterDto registerDto) {
         String userName = registerDto.getUserName();
         String userPassword = registerDto.getUserPassword();

@@ -28,12 +28,11 @@ public class LoginController {
     /*
     用户 用户名密码登录
      */
-    @PostMapping()//指定该方法处理post请求
-    @Operation(summary = "密码登录")//使用swagger注解来描述该方法功能
+    @PostMapping()
+    @Operation(summary = "密码登录")
     public Result namePassLogin(@RequestBody Map<String, String> request){
         return userInfoService.passLogin(request);
-    }//接收客户端发送的json数据，并将其解析为一个map对象，方法体调用userInfoService.passLogin(result)
-    //将结果返回客户端
+    }
 
 
     /*

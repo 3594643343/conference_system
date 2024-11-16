@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.hnu.conference_system.mapper.UserRecordMapper">
+
+    <resultMap id="BaseResultMap" type="edu.hnu.conference_system.domain.UserRecord">
+            <id property="userRecordId" column="user_record_id" jdbcType="BIGINT"/>
+            <result property="userId" column="user_id" jdbcType="BIGINT"/>
+            <result property="meetingId" column="meeting_id" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        user_record_id,user_id,meeting_id
+    </sql>
+</mapper>

@@ -10,4 +10,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface MeetingAudioService extends IService<MeetingAudio> {
 
+    String getAudioById(Long meetingAudioId);
 }

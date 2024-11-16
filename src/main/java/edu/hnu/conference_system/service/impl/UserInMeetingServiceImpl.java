@@ -1,5 +1,6 @@
 package edu.hnu.conference_system.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.hnu.conference_system.domain.UserInMeeting;
 import edu.hnu.conference_system.service.UserInMeetingService;
@@ -7,6 +8,7 @@ import edu.hnu.conference_system.mapper.UserInMeetingMapper;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,6 +32,18 @@ public class UserInMeetingServiceImpl extends ServiceImpl<UserInMeetingMapper, U
             uim.setUserId(userId);
             userInMeetingMapper.insert(uim);
         }
+    }
+
+    @Override
+    public List<Long> getUsersIdsFromMeetingId(Long meetingId) {
+        List<UserInMeeting> list = userInMeetingMapper.selectList(
+                new QueryWrapper<UserInMeeting>().eq("meeting_id", meetingId)
+        );
+        List<Long> userIds = new ArrayList<>();
+        for(UserInMeeting uim : list){
+            userIds.add(uim.getUserId());
+        }
+        return userIds;
     }
 }
 

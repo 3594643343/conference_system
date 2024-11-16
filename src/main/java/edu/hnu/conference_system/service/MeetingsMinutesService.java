@@ -12,4 +12,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface MeetingsMinutesService extends IService<MeetingsMinutes> {
 
+    String getMinutesById(Long meetingMinutesId);
 }

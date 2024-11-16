@@ -11,10 +11,11 @@ import edu.hnu.conference_system.service.MeetingService;
 import edu.hnu.conference_system.service.ScheduleService;
 import edu.hnu.conference_system.vo.ScheduleShowVo;
 import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-
+@Service
 public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper, Schedule>
     implements ScheduleService {
 

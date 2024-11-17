@@ -22,6 +22,7 @@ public class MenuController {
     @Resource
     MeetingService meetingService;
 
+    //TODO 创建会议后将会议加入自己的日程
     @PostMapping("/book")
     @Operation(summary = "预定会议")
     public Result bookMeeting(@RequestBody BookMeetingDto bookMeetingDto) {

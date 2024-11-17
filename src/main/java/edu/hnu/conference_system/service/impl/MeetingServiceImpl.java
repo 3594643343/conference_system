@@ -201,10 +201,13 @@ public class MeetingServiceImpl extends ServiceImpl<MeetingMapper, Meeting>
                 new QueryWrapper<Meeting>().eq("meeting_number", meetingNumber)
         );
         if(meeting == null){
-            return (long) -1;
+            throw new RuntimeException("不存在该会议!");
+        }
+        if(Objects.equals(meeting.getMeetingState(), "end")){
+            throw new RuntimeException("会议已结束!");
         }
         else if(!meeting.getMeetingPassword().equals(meetingPassword)){
-            return (long) -1;
+            throw new RuntimeException("会议密码错误!");
         }
         else return meeting.getMeetingId();
     }

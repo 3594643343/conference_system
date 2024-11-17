@@ -26,7 +26,7 @@ public interface UserInfoService extends IService<UserInfo> {
     Result passLogin(LoginDto loginDto);
     Result emailLogin(EmailLoginVo emailLoginVo);
 
-    long userRegister(String userName, String userPassword, String checkPassword);
+    Result userRegister(String userName,String userEmail ,String userPassword, String checkPassword) throws IOException;
 
     UserInfoVo buildUserInfoVo(Long id);
 

@@ -26,13 +26,13 @@ public class UserInterceptor implements HandlerInterceptor {
                 UserHolder.setUserInfo(dto);
                 return true;
             } else {
-                System.out.println("token 验证失败1！");
+                System.out.println("token 验证失败！");
                 //log.error("token 验证失败！token is {}, uri is {}", token, request.getRequestURI());
                 response.setStatus(401);
                 return false;
             }
         } else {
-            System.out.println("token 验证失败2！");
+            System.out.println("token 验证失败！");
            // log.error("token 验证失败！token is {}, uri is {}", token, request.getRequestURI());
             response.setStatus(401);
             return false;

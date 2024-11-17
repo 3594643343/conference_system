@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -26,18 +27,13 @@ public class RegisterController {
      */
     @PostMapping
     @Operation(summary = "用户注册")
-    public Result<Long> register(@RequestBody RegisterDto registerDto) {
+    public Result register(@RequestBody RegisterDto registerDto) throws IOException {
         String userName = registerDto.getUserName();
+        String userEmail = registerDto.getUserEmail();
         String userPassword = registerDto.getUserPassword();
         String checkPassword = registerDto.getCheckPassword();
 
         // 调用服务层方法进行注册
-        long userId = userInfoService.userRegister(userName, userPassword, checkPassword);
-
-        if (userId == -1) {
-            return Result.error("注册失败");
-        } else {
-            return Result.success(userId);
-        }
+        return userInfoService.userRegister(userName, userEmail,userPassword, checkPassword);
     }
 }

@@ -24,8 +24,8 @@ import org.springframework.stereotype.Service;
 import edu.hnu.conference_system.service.UserInfoService;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,6 +49,9 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
 
     @Value("${files-upload-url.avatar}")
     private String filePath;
+
+    @Value("${files-upload-url.default-avatar}")
+    private String defaultAvatar;
 
     @Resource
     UserInfoMapper userMapper;
@@ -130,45 +133,70 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     }
 
     @Override
-    public long userRegister(String userName, String userPassword, String checkPassword) {
+    public Result userRegister(String userName,String userEmail ,String userPassword, String checkPassword) throws IOException {
         //1.校验 账户、密码、效验码不可为空
-        if (StringUtils.isAnyBlank(userName, userPassword, checkPassword)) {
-            return -1;
+        if (StringUtils.isAnyBlank(userName,userEmail ,userPassword, checkPassword)) {
+            return Result.error("用户名、邮箱或密码不能为空!");
         }
-        if (userName.length() < 4) {//账号长度不可小于4
-            return -1;
+        if (userName.length() < 3) {//账号长度不可小于3
+            return Result.error("用户名长度不可小于3!");
         }
-        if (userPassword.length() < 8 || checkPassword.length() < 8) {//密码长度不可小于8
-            return -1;
+        if (userPassword.length() < 6 || checkPassword.length() < 6) {//密码长度不可小于6
+            return Result.error("密码长度不可小于6!");
         }
         //账号不可重复（同一账号不可重复注册）
         QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_name", userName);
         long count = userMapper.selectCount(queryWrapper);
         if (count > 0) {
-            return -1;
+            return Result.error("用户名已被使用!");
         }
         //账号不能包含特殊字符
         String validPattern = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
         Matcher matcher = Pattern.compile(validPattern).matcher(userName);
         if (matcher.find()) {
-            return -1;
+            return Result.error("用户名中不能有特殊字符!");
         }
         //密码和校验密码相同
         if (!userPassword.equals(checkPassword)) {
-            return -1;
+            return Result.error("两次密码不同!");
         }
         //2.加密
         userPassword = EncryptedPassword(userPassword);
         //3.插入数据
         UserInfo userInfo = new UserInfo();
         userInfo.setUserName(userName);
+        userInfo.setUserEmail(userEmail);
         userInfo.setUserPassword(userPassword);
+        userInfo.setUserRegTime(LocalDateTime.now());
+        userInfo.setIsAdmin(false);
+        userInfo.setUserSignature("尚未设置个性签名");
+
         boolean saveResult = this.save(userInfo);
         if (!saveResult) {
-            return -1;
+            return Result.error("内部错误!");
         }
-        return userInfo.getUserId();
+        String avatarPath = filePath+"/"+userInfo.getUserId()+".jpg";
+        userInfo.setAvatarPath(avatarPath);
+        boolean f = setDefaultAvatar(avatarPath);
+        if(!f){
+            return Result.error("内部错误!");
+        }
+        userMapper.update(userInfo, new UpdateWrapper<UserInfo>().eq("user_id", userInfo.getUserId()));
+        return Result.success(userInfo.getUserId());
+    }
+    private Boolean setDefaultAvatar(String path) throws IOException {
+        FileOutputStream file = new FileOutputStream(path);
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(new File(defaultAvatar));
+        }catch (Exception e) {
+            return false;
+        }
+        fis.transferTo(file);
+        fis.close();
+        file.close();
+        return true;
     }
 
     public UserInfoVo buildUserInfoVo(Long id) {
@@ -193,8 +221,14 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     @Override
     public Result changeUserInfo(UserInfoDto userInfoDto){
 
-        if(userInfoDto.getUserName() == null){
+        if(Objects.equals(userInfoDto.getUserName(), "")){
             return Result.error("用户名不能为空!");
+        }
+        //账号不能包含特殊字符
+        String validPattern = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+        Matcher matcher = Pattern.compile(validPattern).matcher(userInfoDto.getUserName());
+        if (matcher.find()) {
+            return Result.error("用户名中不能有特殊字符!");
         }
         UserInfo userInfo = userMapper.selectOne(
                 new QueryWrapper<UserInfo>().eq("user_name", userInfoDto.getUserName())
@@ -210,7 +244,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         newUserInfo.setUserSignature(userInfoDto.getSignature());
 
 
-        userMapper.update(newUserInfo,new UpdateWrapper<UserInfo>().eq("user_id", userInfo.getUserId()));
+        userMapper.update(newUserInfo,new UpdateWrapper<UserInfo>().eq("user_id", UserHolder.getUserId()));
         return Result.success("修改成功!");
     }
 
@@ -219,8 +253,11 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         if(!Objects.equals(passwordChangeDto.getNewPassword(), passwordChangeDto.getConfirmPassword())){
             return Result.error("两次密码不一致!");
         }
+        if(passwordChangeDto.getNewPassword().length()<6){
+            return Result.error("密码长度不能小于3!");
+        }
         UserInfo user = userMapper.selectById(UserHolder.getUserId());
-        if(user.getUserPassword()!= EncryptedPassword(passwordChangeDto.getNewPassword())){
+        if(!Objects.equals(user.getUserPassword(), EncryptedPassword(passwordChangeDto.getOldPassword()))){
             return Result.error("密码错误!");
         }
         UserInfo userInfo = new UserInfo();
@@ -243,7 +280,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
             newAvatar = oldAvatar;
         }
         else{
-            newAvatar = filePath+userInfo.getUserId();
+            newAvatar = filePath+"/"+userInfo.getUserId()+".jpg";
         }
         UserInfo newUserInfo = new UserInfo();
         newUserInfo.setAvatarPath(newAvatar);

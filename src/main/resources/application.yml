@@ -20,4 +20,5 @@ server:
 files-upload-url:
   avatar: D://code/files_upload/avatar
   file: D://code/files_upload/file
+  default-avatar: D://code/files_upload/defaultAvatar.jpg
 debug: false

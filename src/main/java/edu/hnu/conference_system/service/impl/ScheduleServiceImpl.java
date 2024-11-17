@@ -39,9 +39,7 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper, Schedule>
     @Override
     public Result add(Long userId, JoinMeetingDto joinMeetingDto) {
         Long meetingId = meetingService.validate(joinMeetingDto.getMeetingNumber(),joinMeetingDto.getMeetingPassword());
-        if(meetingId==-1){
-            return Result.error("会议号或密码错误!");
-        }
+
         Schedule schedule = new Schedule();
         schedule.setUserId(userId);
         schedule.setMeetingId(meetingId);

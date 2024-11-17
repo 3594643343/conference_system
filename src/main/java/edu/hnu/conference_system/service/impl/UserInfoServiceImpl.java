@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.hnu.conference_system.domain.User;
 import edu.hnu.conference_system.domain.UserInfo;
+import edu.hnu.conference_system.dto.LoginDto;
 import edu.hnu.conference_system.dto.PasswordChangeDto;
 import edu.hnu.conference_system.dto.UserDto;
 import edu.hnu.conference_system.dto.UserInfoDto;
@@ -21,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import edu.hnu.conference_system.service.UserInfoService;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,15 +54,15 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     UserInfoMapper userMapper;
 
     @Override
-    public Result passLogin(Map<String, String> request) {
-        String name = request.get("userName");
-        String email = request.get("userEmail");
+    public Result passLogin(LoginDto loginDto) {
+        String name = loginDto.getUserName();
+        String email = loginDto.getUserEmail();
         if(name == null && email == null){
-            return Result.error("请输入用户名和密码!");
+            return Result.error("请输入用户名或邮箱!");
         }
         String loginStr = (name == null) ? email : name;
         String col = (name == null) ? "user_email" : "user_name";
-        String password = EncryptedPassword(request.get("userPassword"));
+        String password = EncryptedPassword(loginDto.getUserPassword());
 
         //System.out.println(loginStr);
         //System.out.println(password);
@@ -189,8 +191,11 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     }
 
     @Override
-    public Result changeUserInfo(UserInfoDto userInfoDto) throws IOException {
+    public Result changeUserInfo(UserInfoDto userInfoDto){
 
+        if(userInfoDto.getUserName() == null){
+            return Result.error("用户名不能为空!");
+        }
         UserInfo userInfo = userMapper.selectOne(
                 new QueryWrapper<UserInfo>().eq("user_name", userInfoDto.getUserName())
         );
@@ -204,23 +209,6 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         newUserInfo.setUserName(userInfoDto.getUserName());
         newUserInfo.setUserSignature(userInfoDto.getSignature());
 
-        String oldAvatar = userInfo.getAvatarPath();
-        String newAvatar = null;
-        if(oldAvatar != null){
-            newAvatar = oldAvatar;
-        }
-        else{
-            newAvatar = filePath+userInfo.getUserId();
-        }
-        newUserInfo.setAvatarPath(newAvatar);
-
-        File file = new File(newAvatar);
-        try {
-            userInfoDto.getAvatar().transferTo(file);
-        }
-        catch (IOException e) {
-            throw new IOException(e.getMessage());
-        }
 
         userMapper.update(newUserInfo,new UpdateWrapper<UserInfo>().eq("user_id", userInfo.getUserId()));
         return Result.success("修改成功!");
@@ -239,6 +227,46 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         userInfo.setUserPassword(EncryptedPassword(passwordChangeDto.getNewPassword()));
         userMapper.update(userInfo,new UpdateWrapper<UserInfo>().eq("user_id", user.getUserId()));
         return Result.success("修改成功!");
+    }
+
+    @Override
+    public Result changeAvatar(MultipartFile avatar) throws IOException {
+        if(avatar == null){
+            return Result.error("未上传文件!");
+        }
+        UserInfo userInfo = userMapper.selectOne(
+                new QueryWrapper<UserInfo>().eq("user_id", UserHolder.getUserId())
+        );
+        String oldAvatar = userInfo.getAvatarPath();
+        String newAvatar = null;
+        if(oldAvatar != null){
+            newAvatar = oldAvatar;
+        }
+        else{
+            newAvatar = filePath+userInfo.getUserId();
+        }
+        UserInfo newUserInfo = new UserInfo();
+        newUserInfo.setAvatarPath(newAvatar);
+
+        File file = new File(newAvatar);
+        try {
+            avatar.transferTo(file);
+        }
+        catch (IOException e) {
+            throw new IOException(e.getMessage());
+        }
+
+        userMapper.update(newUserInfo,new UpdateWrapper<UserInfo>().eq("user_id", userInfo.getUserId()));
+        return Result.success("修改成功!");
+    }
+
+    @Override
+    public Result resetPassword(Long userId) {
+        UserInfo userInfo = userMapper.selectById(userId);
+        //将密码重置为123456
+        userInfo.setUserPassword(EncryptedPassword("123456"));
+        userMapper.update(userInfo,new UpdateWrapper<UserInfo>().eq("user_id", userId));
+        return Result.success("重置成功!");
     }
 
 

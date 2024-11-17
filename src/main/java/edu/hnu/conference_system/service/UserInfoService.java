@@ -2,6 +2,7 @@ package edu.hnu.conference_system.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import edu.hnu.conference_system.domain.UserInfo;
+import edu.hnu.conference_system.dto.LoginDto;
 import edu.hnu.conference_system.dto.PasswordChangeDto;
 import edu.hnu.conference_system.dto.UserInfoDto;
 import edu.hnu.conference_system.result.Result;
@@ -10,6 +11,7 @@ import edu.hnu.conference_system.vo.LoginVo;
 import edu.hnu.conference_system.vo.UserInfoVo;
 //import edu.hnu.conference_system.vo.UserBriefVo;
 import edu.hnu.conference_system.domain.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
@@ -21,7 +23,7 @@ import java.util.Map;
 */
 public interface UserInfoService extends IService<UserInfo> {
 
-    Result passLogin(Map<String, String> request);
+    Result passLogin(LoginDto loginDto);
     Result emailLogin(EmailLoginVo emailLoginVo);
 
     long userRegister(String userName, String userPassword, String checkPassword);
@@ -30,9 +32,13 @@ public interface UserInfoService extends IService<UserInfo> {
 
     String getNameById(Long userId);
 
-    Result changeUserInfo(UserInfoDto userInfoDto) throws IOException;
+    Result changeUserInfo(UserInfoDto userInfoDto);
 
     Result changePassword(PasswordChangeDto passwordChangeDto);
+
+    Result changeAvatar(MultipartFile avatar) throws IOException;
+
+    Result resetPassword(Long userId);
 
     //Result getUserInfo(Long );
 

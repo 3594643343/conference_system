@@ -11,10 +11,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -33,13 +31,19 @@ public class UserInfoController {
         return userInfoService.buildUserInfoVo(UserHolder.getUserId());
     }
 
-    @PutMapping("/change")
+    @PutMapping("/change/info")
     @Operation(summary = "修改用户信息")
-    public Result changeUserInfo(UserInfoDto userInfoDto) throws IOException {
+    public Result changeUserInfo(@RequestBody UserInfoDto userInfoDto){
         return userInfoService.changeUserInfo(userInfoDto);
     }
 
-    @PutMapping("/changepassword")
+    @PutMapping("/change/avatar")
+    @Operation(summary = "修改头像")
+    public Result changeAvatar(@RequestParam("avatar") MultipartFile avatar) throws IOException {
+        return userInfoService.changeAvatar(avatar);
+    }
+
+    @PutMapping("/change/password")
     @Operation(summary = "修改用户密码")
     public Result changePassword(PasswordChangeDto passwordChangeDto){
         return userInfoService.changePassword(passwordChangeDto);

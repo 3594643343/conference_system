@@ -16,5 +16,5 @@ public class UserInfoDto {
 
     private String signature;
 
-    private MultipartFile avatar;
+    //private MultipartFile avatar;
 }

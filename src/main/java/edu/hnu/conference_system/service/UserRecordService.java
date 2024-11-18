@@ -18,4 +18,6 @@ public interface UserRecordService extends IService<UserRecord> {
     Result deleteRecord(Long recordId);
 
     Result getRecordDetail(Long recordId) throws IOException;
+
+    void insertRecord(Long userId, Long meetingId);
 }

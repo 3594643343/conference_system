@@ -1,5 +1,6 @@
 package edu.hnu.conference_system.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import edu.hnu.conference_system.domain.Meeting;
 import edu.hnu.conference_system.domain.Room;
 import edu.hnu.conference_system.domain.User;
@@ -9,9 +10,11 @@ import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.*;
 import edu.hnu.conference_system.utils.Base64Utils;
 import edu.hnu.conference_system.utils.FileToPicUtils;
+import edu.hnu.conference_system.vo.CreateMeetingVo;
 import edu.hnu.conference_system.vo.FileShowVo;
 import edu.hnu.conference_system.vo.UserInfoVo;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static edu.hnu.conference_system.service.impl.UserInfoServiceImpl.userList;
 import static java.time.LocalTime.ofSecondOfDay;
@@ -33,9 +37,11 @@ public class RoomServiceImpl implements RoomService {
      */
     static List<Room> roomList = new ArrayList<>();
 
-
     @Value("${files-upload-url.file}")
     private String filePath;
+
+    @Resource
+    MeetingService meetingService;
 
     @Resource
     UserInMeetingService userInMeetingService;
@@ -47,14 +53,176 @@ public class RoomServiceImpl implements RoomService {
     FileService fileService;
 
     @Resource
-    FileUploadService fileUploadService;
+    UserRecordService userRecordService;
+
+    @Override
+    public CreateMeetingVo bookMeeting(BookMeetingDto bookMeetingDto) {
+        String meetingNumber = RandomStringUtils.randomAlphanumeric(9);
+        //System.out.println(meetingNumber);
+        Meeting meeting = new Meeting(bookMeetingDto.getMeetingName(), meetingNumber, bookMeetingDto.getMeetingPassword(),
+                UserHolder.getUserId(),bookMeetingDto.getMeetingStartTime(),bookMeetingDto.getMeetingEndTime(),
+                bookMeetingDto.getDefaultPermission());
+
+
+        meetingService.insertMeeting(meeting);
+        return new CreateMeetingVo(meetingNumber,bookMeetingDto.getMeetingPassword());
+    }
+
+    @Override
+    public Result quickMeeting() {
+        String meetingNumber = RandomStringUtils.randomAlphanumeric(9);
+        Meeting meeting = new Meeting(UserHolder.getUserInfo().getUserName(), meetingNumber,
+                UserHolder.getUserId(), LocalDateTime.now() );
+        meetingService.insertMeeting(meeting);
+        //加入会议
+
+        JoinMeetingDto joinMeetingDto = new JoinMeetingDto(meetingNumber,null);
+        joinMeeting(joinMeetingDto);
+        return Result.success(new CreateMeetingVo(meetingNumber,"0"));
+
+    }
+
+    @Override
+    public Result joinMeeting(JoinMeetingDto joinMeetingDto) {
+        String meetingNumber = joinMeetingDto.getMeetingNumber();
+        String meetingPassword = joinMeetingDto.getMeetingPassword();
+
+        Meeting meeting = meetingService.selectByNumber(meetingNumber);
+
+        if(meeting == null){
+            return Result.error("不存在该会议!");
+        }
+        else if(Objects.equals(meeting.getMeetingState(), "off")){
+            if(UserHolder.getUserId().equals(meeting.getUserId())){
+                //用户为会议创建者, 在用户list中修改相关信息
+                for(User user:userList){
+                    if(Objects.equals(user.getId(), UserHolder.getUserId())){
+                        user.setMeetingId(meeting.getMeetingId());
+                        user.setMeetingNumber(meetingNumber);
+                        user.setMeetingPermission(2);
+                    }
+                }
+                //创建者加入会议, 开始会议
+                startMeeting(meeting);
+
+                return Result.success("加入会议成功!");
+            }
+            else{
+                return Result.error("会议尚未开始!");
+            }
+        }
+        else if(Objects.equals(meeting.getMeetingState(), "on")){
+            if(meeting.getMeetingPassword().equals(meetingPassword)){
+                //用户为会议参与者, 在用户list中修改相关信息
+                for(User user:userList){
+                    if(Objects.equals(user.getId(), UserHolder.getUserId())){
+                        user.setMeetingId(meeting.getMeetingId());
+                        user.setMeetingNumber(meetingNumber);
+                        user.setMeetingPermission(meeting.getDefaultPermission());
+                        //加入会议房间
+                        joinRoom(meeting.getMeetingNumber(),user);
+                        break;
+                    }
+                }
+                return Result.success("加入会议成功!");
+            }
+            else{
+                return Result.error("密码错误!");
+            }
+        }
+        else if(Objects.equals(meeting.getMeetingState(), "end")){
+            return Result.error("会议已结束!");
+        }
+        else{
+            return Result.error("发生未知错误!");
+        }
+
+    }
+
+    @Override
+    public Result leaveMeeting() {
+        for (User user : userList) {
+            if (Objects.equals(user.getId(), UserHolder.getUserId())) {
+                if (user.getMeetingPermission() == 2) {
+                    //用户在某个会议中权限为2及创建者, 退出会议即为结束会议
+                    //System.out.println(user.getId()+" "+user.getMeetingNumber()+" "+ user.getMeetingPermission());
+
+                    Meeting meet = deleteRoom(user.getMeetingNumber(),user.getMeetingId());
+                    meetingService.endMeeting(meet);
+                } else {
+                    leaveRoom(user.getMeetingNumber());
+                }
+
+                //System.out.println("存在"+roomList.size()+"个房间!");
+                break;
+            }
+
+        }
+        return Result.success("已退出会议!");
+    }
+
+    @Override
+    public Result joinFromSchedule(String meetingNumber) {
+        Meeting meeting = meetingService.selectByNumber(meetingNumber);
+        if(meeting == null){
+            return Result.error("不存在该会议!");
+        }
+        else if(Objects.equals(meeting.getMeetingState(), "off")){
+            if(UserHolder.getUserId().equals(meeting.getUserId())){
+                //用户为会议创建者, 在用户list中修改相关信息
+                for(User user:userList){
+                    if(Objects.equals(user.getId(), UserHolder.getUserId())){
+                        user.setMeetingId(meeting.getMeetingId());
+                        user.setMeetingNumber(meetingNumber);
+                        user.setMeetingPermission(2);
+                    }
+                }
+                //创建者加入会议, 开始会议
+                startMeeting(meeting);
+
+                return Result.success("加入会议成功!");
+            }
+            else{
+                return Result.error("会议尚未开始!");
+            }
+        }
+        else if(Objects.equals(meeting.getMeetingState(), "on")){
+            //用户为会议参与者, 在用户list中修改相关信息
+            for(User user:userList){
+                if(Objects.equals(user.getId(), UserHolder.getUserId())){
+                    user.setMeetingId(meeting.getMeetingId());
+                    user.setMeetingNumber(meetingNumber);
+                    user.setMeetingPermission(meeting.getDefaultPermission());
+                    //加入会议房间
+                    joinRoom(meeting.getMeetingNumber(),user);
+                    break;
+                }
+            }
+            return Result.success("加入会议成功!");
+        }
+        else if(Objects.equals(meeting.getMeetingState(), "end")){
+            return Result.error("会议已结束!");
+        }
+        else{
+            return Result.error("发生未知错误!");
+        }
+    }
+
+
+    private void startMeeting(Meeting meeting) {
+        addRoom(meeting);
+        //更改数据库中会议状态
+        meetingService.turnOnMeeting(meeting.getMeetingId());
+
+        //System.out.println("存在"+roomList.size()+"个房间!");
+
+    }
 
     /**
      * 实例化一个Room,将room加入到roomlist中
      * @param meeting
      */
-    @Override
-    public void addRoom(Meeting meeting) {
+    private void addRoom(Meeting meeting) {
         Room room = new Room(meeting.getMeetingName(),meeting.getMeetingId(), meeting.getMeetingNumber(), LocalDateTime.now(),
                 meeting.getDefaultPermission(), meeting.getUserId(),new ArrayList<>(),new ArrayList<>());
 
@@ -73,8 +241,7 @@ public class RoomServiceImpl implements RoomService {
         System.out.println("当前共有"+roomList.size()+"个房间");
     }
 
-    @Override
-    public void joinRoom(String meetingNumber,User user) {
+    private void joinRoom(String meetingNumber,User user) {
         for (Room room : roomList) {
             if(room.getMeetingNumber().equals(meetingNumber)) {
                 room.getMembersOn().add(user);
@@ -88,8 +255,7 @@ public class RoomServiceImpl implements RoomService {
 
     }
 
-    @Override
-    public void leaveRoom(String meetingNumber) {
+    private void leaveRoom(String meetingNumber) {
         for (Room room : roomList) {
             if(room.getMeetingNumber().equals(meetingNumber)) {
                 for(User user : room.getMembersOn()) {
@@ -113,8 +279,7 @@ public class RoomServiceImpl implements RoomService {
      * @param meetingNumber
      * @return
      */
-    @Override
-    public Meeting deleteRoom(String meetingNumber) {
+    private Meeting deleteRoom(String meetingNumber,Long meetingId) {
         Meeting meeting = new Meeting();
         for(Room room : roomList) {
             //找到要关闭的房间
@@ -125,6 +290,7 @@ public class RoomServiceImpl implements RoomService {
                 //TODO 记录会议音频、纪要等到数据库
 
                 //为meeting赋值
+                meeting.setMeetingId(meetingId);
                 meeting.setMeetingNumber(meetingNumber);
                 meeting.setMeetingEndTime(LocalDateTime.now());
                 meeting.setMeetingTime(ofSecondOfDay(LocalDateTime.now().toLocalTime().toSecondOfDay()-
@@ -134,6 +300,11 @@ public class RoomServiceImpl implements RoomService {
                 meeting.setMeetingState("end");
                 //TODO 保存会议音频、纪要等id到meeting表
 
+
+                //为每一个与会者插入记录索引表
+                for(Long userId : room.getMembersAll()) {
+                    userRecordService.insertRecord(userId,meetingId);
+                }
 
                 //将要关闭的房间中的用户与会议相关的变量清空并全踢出房间
                 for(User user : room.getMembersOn()) {
@@ -157,8 +328,7 @@ public class RoomServiceImpl implements RoomService {
      * 将进入过房间的人保存到数据库中
      * 会议结束时调用
      */
-    @Override
-    public void saveAllUserInMeeting(Room room) {
+    private void saveAllUserInMeeting(Room room) {
         List<Long> userIds = new ArrayList<>(room.getMembersAll());
         userInMeetingService.saveAllUserInMeeting(room.getMeetingId(), userIds);
     }
@@ -363,6 +533,10 @@ public class RoomServiceImpl implements RoomService {
 
 
     }
+
+
+
+
 
 
 }

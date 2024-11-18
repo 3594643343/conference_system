@@ -3,9 +3,12 @@ package edu.hnu.conference_system.controller;
 
 import edu.hnu.conference_system.dto.BookMeetingDto;
 import edu.hnu.conference_system.dto.JoinMeetingDto;
+import edu.hnu.conference_system.holder.UserHolder;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.MeetingService;
 import edu.hnu.conference_system.service.RoomService;
+import edu.hnu.conference_system.service.ScheduleService;
+import edu.hnu.conference_system.vo.CreateMeetingVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -20,24 +23,28 @@ import java.util.Map;
 @Slf4j
 public class MenuController {
     @Resource
-    MeetingService meetingService;
+    RoomService roomService;
+    @Resource
+    ScheduleService scheduleService;
 
     //TODO 创建会议后将会议加入自己的日程
     @PostMapping("/book")
     @Operation(summary = "预定会议")
     public Result bookMeeting(@RequestBody BookMeetingDto bookMeetingDto) {
-        return meetingService.bookMeeting(bookMeetingDto);
+        CreateMeetingVo vo = roomService.bookMeeting(bookMeetingDto);
+        scheduleService.add(UserHolder.getUserId(),new JoinMeetingDto(vo.getMeetingNumber(), vo.getMeetingPassword()));
+        return Result.success(vo);
     }
 
     @GetMapping("/quick")
     @Operation(summary = "快速会议")
     public Result quickMeeting(){
-        return meetingService.quickMeeting();
+        return roomService.quickMeeting();
     }
 
     @PostMapping("/join")
     @Operation(summary = "加入会议")
     public Result joinMeeting(@RequestBody JoinMeetingDto joinMeetingDto) {
-        return meetingService.joinMeeting(joinMeetingDto);
+        return roomService.joinMeeting(joinMeetingDto);
     }
 }

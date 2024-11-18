@@ -27,10 +27,11 @@ public class MeetingController {
     @Resource
     RoomService roomService;
 
+
     @GetMapping("/leave")
     @Operation(summary = "退出会议")
-    public void leaveMeeting(){
-        meetingService.leaveMeeting();
+    public Result leaveMeeting(){
+        return roomService.leaveMeeting();
     }
 
     @GetMapping("/userlist")

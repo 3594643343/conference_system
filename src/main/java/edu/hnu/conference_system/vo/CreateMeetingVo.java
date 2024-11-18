@@ -13,4 +13,6 @@ public class CreateMeetingVo {
      * 会议号
      */
     private String meetingNumber;
+
+    private String meetingPassword;
 }

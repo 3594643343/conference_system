@@ -32,7 +32,7 @@ public class AdminController {
     public Result getAllUsers(@RequestParam("pageNumber") Long pageNumber) {
         Page<UserInfo> userInfoPage = new Page<>(pageNumber, 10);
         Page<UserInfo> page = new LambdaQueryChainWrapper<>(userInfoService.getBaseMapper()).page(userInfoPage);
-        System.out.println(page == userInfoPage);
+        //System.out.println(page == userInfoPage);
         List<UserInfo> userInfoList = page.getRecords();
         List<UserInfoForAdmin> userInfoForAdminList = new ArrayList<>();
         for (UserInfo userInfo : userInfoList) {
@@ -49,6 +49,8 @@ public class AdminController {
         return userInfoService.deleteById(userId);
     }*/
 
+    @GetMapping("/reset")
+    @Operation(summary = "重置密码")
     public Result resetPassword(@RequestParam("userId") Long userId) {
         return userInfoService.resetPassword(userId);
     }

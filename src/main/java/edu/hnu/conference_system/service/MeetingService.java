@@ -6,6 +6,7 @@ import edu.hnu.conference_system.domain.User;
 import edu.hnu.conference_system.dto.BookMeetingDto;
 import edu.hnu.conference_system.dto.JoinMeetingDto;
 import edu.hnu.conference_system.result.Result;
+import edu.hnu.conference_system.vo.CreateMeetingVo;
 import edu.hnu.conference_system.vo.MeetingInfoVo;
 import edu.hnu.conference_system.vo.RecordVo;
 import edu.hnu.conference_system.vo.ScheduleShowVo;
@@ -20,25 +21,11 @@ import java.util.Map;
 */
 public interface MeetingService extends IService<Meeting> {
 
-    Result bookMeeting(BookMeetingDto bookMeetingDto);
-
-    Result quickMeeting();
-
-    Result joinMeeting(JoinMeetingDto joinMeetingDto);
-
-    void startMeeting(Meeting meeting);
-
     void endMeeting(Meeting meet);
-
-    void leaveMeeting();
-
 
     ScheduleShowVo buildSceduleShowVoById(Long meetingId);
 
     Long validate(String meetingNumber, String meetingPassword);
-
-
-    Result joinFromSchedule(String meetingNumber);
 
     RecordVo buildRecordVoById(Long meetingId);
 
@@ -47,4 +34,12 @@ public interface MeetingService extends IService<Meeting> {
     Long getMeetingRecordId(Long meetingId);
 
     Long getMeetingAudioId(Long meetingId);
+
+    void insertMeeting(Meeting meeting);
+
+    Meeting selectByNumber(String meetingNumber);
+
+    void turnOnMeeting(Long meetingId);
+
+    Meeting selectById(Long meetingId);
 }

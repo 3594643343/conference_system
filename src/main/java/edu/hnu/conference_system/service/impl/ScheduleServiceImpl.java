@@ -8,6 +8,7 @@ import edu.hnu.conference_system.holder.UserHolder;
 import edu.hnu.conference_system.mapper.ScheduleMapper;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.MeetingService;
+import edu.hnu.conference_system.service.RoomService;
 import edu.hnu.conference_system.service.ScheduleService;
 import edu.hnu.conference_system.vo.ScheduleShowVo;
 import jakarta.annotation.Resource;
@@ -23,6 +24,8 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper, Schedule>
     private ScheduleMapper scheduleMapper;
     @Resource
     private MeetingService meetingService;
+    @Resource
+    private RoomService roomService;
 
     @Override
     public Result show(Long userId) {
@@ -40,6 +43,12 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper, Schedule>
     public Result add(Long userId, JoinMeetingDto joinMeetingDto) {
         Long meetingId = meetingService.validate(joinMeetingDto.getMeetingNumber(),joinMeetingDto.getMeetingPassword());
 
+        Schedule s = scheduleMapper.selectOne(
+                new QueryWrapper<Schedule>().eq("user_id",userId).eq("meeting_id",meetingId)
+        );
+        if(s!=null){
+            return Result.error("已有该日程!");
+        }
         Schedule schedule = new Schedule();
         schedule.setUserId(userId);
         schedule.setMeetingId(meetingId);
@@ -49,8 +58,8 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper, Schedule>
 
     @Override
     public Result join(Long meetingId,String meetingnumber) {
-        Result r = meetingService.joinFromSchedule(meetingnumber);
-        if( r == Result.success("加入会议成功!")){
+        Result r = roomService.joinFromSchedule(meetingnumber);
+        if( r.getCode() == 1){
             cancel(UserHolder.getUserId(),meetingId);
             return r;
         }

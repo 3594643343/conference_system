@@ -18,9 +18,9 @@ import java.util.Map;
 
 /**
 * @author lenovo
-* @description 针对表【user_info】的数据库操作Service
-* @createDate 2024-11-07 10:29:00
-*/
+* &#064;description  针对表【user_info】的数据库操作Service
+* &#064;createDate  2024-11-07 10:29:00
+ */
 public interface UserInfoService extends IService<UserInfo> {
 
     Result passLogin(LoginDto loginDto);

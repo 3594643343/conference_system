@@ -4,11 +4,9 @@ package edu.hnu.conference_system.service;
 import edu.hnu.conference_system.domain.Meeting;
 import edu.hnu.conference_system.domain.Room;
 import edu.hnu.conference_system.domain.User;
-import edu.hnu.conference_system.dto.KickDto;
-import edu.hnu.conference_system.dto.MuteDto;
-import edu.hnu.conference_system.dto.PmChangeDto;
-import edu.hnu.conference_system.dto.UploadFileDto;
+import edu.hnu.conference_system.dto.*;
 import edu.hnu.conference_system.result.Result;
+import edu.hnu.conference_system.vo.CreateMeetingVo;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,15 +14,19 @@ import java.util.Map;
 
 public interface RoomService {
 
-    void addRoom(Meeting meeting);
+    //以下为主菜单接口
 
-    void joinRoom(String meetingNumber, User user);
+    CreateMeetingVo bookMeeting(BookMeetingDto bookMeetingDto);
 
-    void leaveRoom(String meetingNumber);
+    Result quickMeeting();
 
-    Meeting deleteRoom(String meetingNumber);
+    Result joinMeeting(JoinMeetingDto joinMeetingDto);
 
-    void saveAllUserInMeeting(Room room);
+
+
+    //以下为会议中接口
+
+    Result leaveMeeting();
 
     Result getUserInfo(Map<String,String> request);
 
@@ -39,6 +41,8 @@ public interface RoomService {
     Result uploadFile(UploadFileDto uploadFileDto);
 
     void pushFileToAll(String UploadUserName,String fileName,String path) throws Exception;
+
+    Result joinFromSchedule(String meetingNumber);
 
     //Result getUserDetail(Map<String,String> request);
 }

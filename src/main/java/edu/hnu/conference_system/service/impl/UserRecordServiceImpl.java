@@ -45,6 +45,7 @@ public class UserRecordServiceImpl extends ServiceImpl<UserRecordMapper, UserRec
         List<UserRecord> userRecords = userRecordMapper.selectList(
                 new QueryWrapper<UserRecord>().eq("user_id", userId)
         );
+        System.out.println("共有记录条数: "+userRecords.size());
 
         for(UserRecord userRecord : userRecords){
             Long meetingId = userRecord.getMeetingId();
@@ -56,6 +57,7 @@ public class UserRecordServiceImpl extends ServiceImpl<UserRecordMapper, UserRec
             for(Long usersId : usersIds){
                 recordVo.getParticipants().add(userInfoService.getNameById(usersId));
             }
+            recordVos.add(recordVo);
         }
         return Result.success(recordVos);
 
@@ -69,7 +71,11 @@ public class UserRecordServiceImpl extends ServiceImpl<UserRecordMapper, UserRec
 
     @Override
     public Result getRecordDetail(Long recordId) throws IOException {
-        Long meetingId = userRecordMapper.selectById(recordId).getMeetingId();
+        UserRecord userRecord = userRecordMapper.selectById(recordId);
+        if(userRecord == null){
+            throw new IOException("没有该记录");
+        }
+        Long meetingId = userRecord.getMeetingId();
 
         Long meetingMinutesId = meetingService.getMeetingMinutesId(meetingId);
         Long meetingRecordId = meetingService.getMeetingRecordId(meetingId);
@@ -85,6 +91,14 @@ public class UserRecordServiceImpl extends ServiceImpl<UserRecordMapper, UserRec
         recordDetailVo.setMeetingMinutes(minutes);
 
         return Result.success(recordDetailVo);
+    }
+
+    @Override
+    public void insertRecord(Long userId, Long meetingId) {
+        UserRecord userRecord = new UserRecord();
+        userRecord.setUserId(userId);
+        userRecord.setMeetingId(meetingId);
+        userRecordMapper.insert(userRecord);
     }
 }
 

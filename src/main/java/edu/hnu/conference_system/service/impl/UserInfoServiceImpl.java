@@ -306,6 +306,16 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         return Result.success("重置成功!");
     }
 
+    @Override
+    public Long getMeetingIdByUserId(Long userId) {
+        for(User user:userList){
+            if(user.getId().equals(userId)){
+                return user.getMeetingId();
+            }
+        }
+        return (long) -1;
+    }
+
 
 }
 

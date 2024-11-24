@@ -10,6 +10,7 @@ import edu.hnu.conference_system.vo.CreateMeetingVo;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 public interface RoomService {
@@ -43,6 +44,8 @@ public interface RoomService {
     void pushFileToAll(String UploadUserName,String fileName,String path) throws Exception;
 
     Result joinFromSchedule(String meetingNumber);
+
+    List<Long> getOnMeetingUserId(Long meetingId);
 
     //Result getUserDetail(Map<String,String> request);
 }

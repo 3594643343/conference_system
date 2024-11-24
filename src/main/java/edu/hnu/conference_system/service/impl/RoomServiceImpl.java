@@ -208,6 +208,20 @@ public class RoomServiceImpl implements RoomService {
         }
     }
 
+    @Override
+    public List<Long> getOnMeetingUserId(Long meetingId) {
+        for (Room room:roomList){
+            if(Objects.equals(room.getMeetingId(), meetingId)){
+                List<Long> users = new ArrayList<>();
+                for(User user:room.getMembersOn()){
+                    users.add(user.getId());
+                }
+                return users;
+            }
+        }
+        return null;
+    }
+
 
     private void startMeeting(Meeting meeting) {
         addRoom(meeting);

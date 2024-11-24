@@ -40,6 +40,8 @@ public interface UserInfoService extends IService<UserInfo> {
 
     Result resetPassword(Long userId);
 
+    Long getMeetingIdByUserId(Long userId);
+
     //Result getUserInfo(Long );
 
     //UserBriefVo buildUserBriefVo(Long id);

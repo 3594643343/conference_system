@@ -31,7 +31,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         /*
         注册拦截器userInterceptor,检查请求token,不拦截登录/注册请求
          */
-        registry.addInterceptor(userInterceptor).addPathPatterns("/**").excludePathPatterns(new String[]{"/login/**", "/register"});
+        registry.addInterceptor(userInterceptor).addPathPatterns("/**")
+                .excludePathPatterns(new String[]{"/login/**", "/register", "/meeting/audio/**"});
 
     }
 

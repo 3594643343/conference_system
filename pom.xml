@@ -132,14 +132,14 @@
 			<artifactId>slides</artifactId>
 			<version>19.3</version>
 			<scope>system</scope>
-			<systemPath>D:/Third/big_modle/conference_system/lib/aspose.slides-19.3.jar</systemPath>
+			<systemPath>D:/code/conference/conference_system/lib/aspose.slides-19.3.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.google.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.6.2</version>
 			<scope>system</scope>
-			<systemPath>D:/Third/big_modle/conference_system/lib/gson-2.6.2.jar</systemPath>
+			<systemPath>D:/code/conference/conference_system/lib/gson-2.6.2.jar</systemPath>
 		</dependency>
 
 
@@ -148,7 +148,7 @@
 			<artifactId>GsonBuilder</artifactId>
 			<version>3.3.5</version>
 			<scope>system</scope>
-			<systemPath>D:/Third/big_modle/conference_system/lib/spring-boot-autoconfigure-3.3.5.jar</systemPath>
+			<systemPath>D:/code/conference/conference_system/lib/spring-boot-autoconfigure-3.3.5.jar</systemPath>
 		</dependency>
 
 		<dependency>
@@ -156,7 +156,7 @@
 			<artifactId>okhttp</artifactId>
 			<version>3.13.1</version>
 			<scope>system</scope>
-			<systemPath>D:/Third/big_modle/conference_system/lib/okhttp-3.13.1.jar</systemPath>
+			<systemPath>D:/code/conference/conference_system/lib/okhttp-3.13.1.jar</systemPath>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.squareup.okio/okio -->
@@ -165,7 +165,7 @@
 			<artifactId>okio</artifactId>
 			<version>1.15.0</version>
 			<scope>system</scope>
-			<systemPath>D:/Third/big_modle/conference_system/lib/okio-1.15.0-20180330.135339-9.jar</systemPath>
+			<systemPath>D:/code/conference/conference_system/lib/okio-1.15.0-20180330.135339-9.jar</systemPath>
 		</dependency>
 
 

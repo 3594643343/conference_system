@@ -21,4 +21,6 @@ files-upload-url:
   avatar: D://code/files_upload/avatar
   file: D://code/files_upload/file
   default-avatar: D://code/files_upload/defaultAvatar.jpg
+  audios: D://code/files_upload/Audios
+python-script-path: src/main/java/edu/hnu/conference_system/python/MergeAudios.py
 debug: false

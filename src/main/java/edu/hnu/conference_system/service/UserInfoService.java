@@ -42,6 +42,7 @@ public interface UserInfoService extends IService<UserInfo> {
 
     Long getMeetingIdByUserId(Long userId);
 
+
     //Result getUserInfo(Long );
 
     //UserBriefVo buildUserBriefVo(Long id);

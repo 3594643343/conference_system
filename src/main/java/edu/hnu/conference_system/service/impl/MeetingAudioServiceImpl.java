@@ -8,6 +8,8 @@ import edu.hnu.conference_system.utils.Base64Utils;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 /**
 * @author lenovo
 * @description 针对表【meeting_audio】的数据库操作Service实现
@@ -25,6 +27,19 @@ public class MeetingAudioServiceImpl extends ServiceImpl<MeetingAudioMapper, Mee
         MeetingAudio meetingAudio = meetingAudioMapper.selectById(meetingAudioId);
         String audioPath = meetingAudio.getAudioPath();
         return Base64Utils.encode(audioPath);
+    }
+
+    @Override
+    public Long recordAudio(Long meetingId, String thisAudioPath) {
+        MeetingAudio meetingAudio = new MeetingAudio();
+        meetingAudio.setAudioPath(thisAudioPath);
+        meetingAudio.setMeetingId(meetingId);
+        //meetingAudio.setAudioTime();
+        meetingAudioMapper.insert(meetingAudio);
+
+        return meetingAudio.getMeetingAudioId();
+
+
     }
 }
 

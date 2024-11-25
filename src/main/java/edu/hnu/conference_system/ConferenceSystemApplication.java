@@ -14,12 +14,12 @@ import static xunfei_api.IatModelZhMain.*;
 
 
 public class ConferenceSystemApplication {
-	private static IatModelZhMain voiceToText;
+	//private static IatModelZhMain voiceToText;
 
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(ConferenceSystemApplication.class, args);
 		// 调用语音转写功能
-		voiceToText.VoiceToText(args);
+		//voiceToText.VoiceToText(args);
 	}
 
 }

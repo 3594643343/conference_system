@@ -13,6 +13,7 @@ import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -38,22 +39,32 @@ public class WebSocketAudioServer {
      */
     private static ConcurrentHashMap<Long, ByteArrayOutputStream> byteArrayOutputStreamConcurrentHashMap = new ConcurrentHashMap<>();
 
+
     private Session session;
     private Long userId;
     private Long meetingId;
     private String wavPath;
 
+    private static String audioPath;
     private static UserInfoService userInfoService;
     private static RoomService roomService;
+
+    /*@Value("${files-upload-url.audios}")
+    public void setAudioPath(String audioPath) {
+        this.audioPath = audioPath;
+    }*/
+
 
     @Autowired
     public void setUserInfoService(UserInfoService userInfoService) {
         WebSocketAudioServer.userInfoService = userInfoService;
+
     }
 
     @Autowired
     public void setRoomService(RoomService roomService) {
         WebSocketAudioServer.roomService = roomService;
+        WebSocketAudioServer.audioPath= roomService.getAudioPath();
     }
 
     @OnOpen
@@ -64,12 +75,20 @@ public class WebSocketAudioServer {
         Long meetingId = userInfoService.getMeetingIdByUserId(userId);
         this.meetingId = meetingId;
         this.userId = userId;
-        String filePath = "C:/Users/lenovo/Desktop/ToWavTest" + File.separator;
-        /*if(!new File(filePath).mkdirs()){
-            System.out.println("创建文件夹鼠标!");
-        }*/
+        String dirPath = audioPath+"/"+meetingId;
+        System.out.println(dirPath);
+        File dir = new File(dirPath);
+        if(!dir.exists()){
+            if(!dir.mkdirs()){
+                System.out.println("创建文件失败!");
+            }
+            /*else{
+                System.out.println("创建文件成功");
+            }*/
+        }
 
-        this.wavPath = filePath +userId + ".wav";
+
+        this.wavPath = dirPath+"/" +userId + ".wav";
         File file = new File(wavPath);
         file.createNewFile();
         System.out.println("用户id:" + userId + "  加入会议:" + meetingId );
@@ -174,15 +193,11 @@ public class WebSocketAudioServer {
         ByteArrayOutputStream tempStream = new ByteArrayOutputStream();
         PcmCovWavUtil.convertWaveFile(read, tempStream);
 
-        String filePath = "C:/Users/lenovo/Desktop/ToWavTest" + File.separator;
-        new File(filePath).mkdirs();
-        FileOutputStream fileOutputStream = new FileOutputStream(new File(filePath +userId + "_rel.wav"));
+        FileOutputStream fileOutputStream = new FileOutputStream(new File(wavPath));
         IoUtil.copy(new ByteArrayInputStream(tempStream.toByteArray()), fileOutputStream);
-
 
         fileOutputStream.flush();
         fileOutputStream.close();
-
 
     }
 

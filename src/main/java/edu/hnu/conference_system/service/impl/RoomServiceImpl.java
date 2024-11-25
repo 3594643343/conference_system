@@ -19,7 +19,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +43,12 @@ public class RoomServiceImpl implements RoomService {
     @Value("${files-upload-url.file}")
     private String filePath;
 
+    @Value("${files-upload-url.audios}")
+    private String audioPath;
+
+    @Value("${python-script-path}")
+    private String pythonScriptPath;
+
     @Resource
     MeetingService meetingService;
 
@@ -54,6 +63,9 @@ public class RoomServiceImpl implements RoomService {
 
     @Resource
     UserRecordService userRecordService;
+
+    @Resource
+    MeetingAudioService meetingAudioService;
 
     @Override
     public CreateMeetingVo bookMeeting(BookMeetingDto bookMeetingDto) {
@@ -222,6 +234,11 @@ public class RoomServiceImpl implements RoomService {
         return null;
     }
 
+    @Override
+    public String getAudioPath() {
+        return audioPath;
+    }
+
 
     private void startMeeting(Meeting meeting) {
         addRoom(meeting);
@@ -299,9 +316,21 @@ public class RoomServiceImpl implements RoomService {
             //找到要关闭的房间
             if(room.getMeetingNumber().equals(meetingNumber)) {
 
+                //开启一个线程去执行录音叠加,完成后将音频记录到数据库
+                Thread t1 = new Thread(() -> {
+                    //录音叠加
+                    mergeAudios2One(meetingId);
+                    //叠加完成后将音频地址记录到数据库
+                    String thisAudioPath = audioPath+"/"+meetingId+"/"+"out.wav";
+                    Long audioId = meetingAudioService.recordAudio(meetingId,thisAudioPath);
+                    //将音频id插入到会议记录表里
+                    meeting.setMeetingAudioId(audioId);
+                });
+                t1.start();
+
                 //记录参会者
                 saveAllUserInMeeting(room);
-                //TODO 记录会议音频、纪要等到数据库
+                //TODO 记录会议撰写等到数据库
 
                 //为meeting赋值
                 meeting.setMeetingId(meetingId);
@@ -312,7 +341,8 @@ public class RoomServiceImpl implements RoomService {
                 );
                 meeting.setParticipantCount(room.getMembersOn().size());
                 meeting.setMeetingState("end");
-                //TODO 保存会议音频、纪要等id到meeting表
+
+                //TODO 保存会议转写等id到meeting表
 
 
                 //为每一个与会者插入记录索引表
@@ -544,8 +574,32 @@ public class RoomServiceImpl implements RoomService {
         }
 
         //TODO 将文件推送给所有人
+    }
 
+    private void mergeAudios2One(Long meetingId){
 
+        //String inputValue = "C:\\Users\\lenovo\\Desktop\\ttt"; // 传递给Python脚本的输入值
+        String dirPath = audioPath+"/"+meetingId;
+
+        try {
+            // 创建进程
+            ProcessBuilder processBuilder = new ProcessBuilder("python", pythonScriptPath, dirPath);
+            processBuilder.redirectErrorStream(true); // 合并标准输出和错误输出
+            Process process = processBuilder.start();
+
+            // 读取输出
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+
+            // 等待Python脚本执行完成
+            int exitCode = process.waitFor();
+            System.out.println("Python script exited with code: " + exitCode);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 

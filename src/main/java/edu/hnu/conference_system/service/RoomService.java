@@ -47,5 +47,8 @@ public interface RoomService {
 
     List<Long> getOnMeetingUserId(Long meetingId);
 
+    String getAudioPath();
+
+
     //Result getUserDetail(Map<String,String> request);
 }

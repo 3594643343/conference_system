@@ -77,18 +77,18 @@ public class UserRecordServiceImpl extends ServiceImpl<UserRecordMapper, UserRec
         }
         Long meetingId = userRecord.getMeetingId();
 
-        Long meetingMinutesId = meetingService.getMeetingMinutesId(meetingId);
+        //Long meetingMinutesId = meetingService.getMeetingMinutesId(meetingId);
         Long meetingRecordId = meetingService.getMeetingRecordId(meetingId);
         Long meetingAudioId = meetingService.getMeetingAudioId(meetingId);
 
-        String minutes = meetingsMinutesService.getMinutesById(meetingMinutesId);
+        //String minutes = meetingsMinutesService.getMinutesById(meetingMinutesId);
         String record = recordService.getRecordById(meetingRecordId);
         String audio = meetingAudioService.getAudioById(meetingAudioId);
 
         RecordDetailVo recordDetailVo = new RecordDetailVo();
         recordDetailVo.setMeetingRecord(record);
         recordDetailVo.setMeetingAudio(audio);
-        recordDetailVo.setMeetingMinutes(minutes);
+        //recordDetailVo.setMeetingMinutes(minutes);
 
         return Result.success(recordDetailVo);
     }

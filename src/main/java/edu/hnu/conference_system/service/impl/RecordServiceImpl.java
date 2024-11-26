@@ -25,6 +25,9 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record>
 
     @Override
     public String getRecordById(Long meetingRecordId) throws IOException {
+        if(meetingRecordId == null){
+            return null;
+        }
         String txtPath =  recordMapper.selectOne(
                 new QueryWrapper<Record>().eq("record_id",meetingRecordId)
         ).getRecordPath();

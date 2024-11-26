@@ -1,6 +1,8 @@
 package edu.hnu.conference_system.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import edu.hnu.conference_system.domain.Meeting;
 import edu.hnu.conference_system.domain.MeetingAudio;
 import edu.hnu.conference_system.service.MeetingAudioService;
 import edu.hnu.conference_system.mapper.MeetingAudioMapper;
@@ -40,6 +42,14 @@ public class MeetingAudioServiceImpl extends ServiceImpl<MeetingAudioMapper, Mee
         return meetingAudio.getMeetingAudioId();
 
 
+    }
+
+    @Override
+    public Long getAudioIdByMeetingId(Long meetingId) {
+        MeetingAudio meetingAudio = meetingAudioMapper.selectOne(
+                new QueryWrapper<MeetingAudio>().eq("meeting_id", meetingId)
+        );
+        return meetingAudio.getMeetingAudioId();
     }
 }
 

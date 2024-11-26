@@ -36,16 +36,17 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     }
 
-    @Override
+    /*@Override
     public void addCorsMappings(CorsRegistry registry) {
         WebMvcConfigurer.super.addCorsMappings(registry);
         registry.addMapping("/**")
                 .allowCredentials(true)
                 .allowedOriginPatterns("*") // 根据需要配置
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedMethods(new String[]{"GET", "POST", "PUT", "DELETE"})
                 .allowedHeaders("*")
                 .exposedHeaders("*");
-    }
+        WebMvcConfigurer.super.addCorsMappings(registry);
+    }*/
 
 
     /**

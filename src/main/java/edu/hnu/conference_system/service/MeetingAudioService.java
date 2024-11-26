@@ -1,5 +1,6 @@
 package edu.hnu.conference_system.service;
 
+import edu.hnu.conference_system.domain.Meeting;
 import edu.hnu.conference_system.domain.MeetingAudio;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -13,4 +14,6 @@ public interface MeetingAudioService extends IService<MeetingAudio> {
     String getAudioById(Long meetingAudioId);
 
     Long recordAudio(Long meetingId, String thisAudioPath);
+
+    Long getAudioIdByMeetingId(Long meetingId);
 }

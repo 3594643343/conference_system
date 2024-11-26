@@ -22,9 +22,10 @@ public class MeetingsMinutesServiceImpl extends ServiceImpl<MeetingsMinutesMappe
 
     @Override
     public String getMinutesById(Long meetingMinutesId) {
-        return meetingsMinutesMapper.selectOne(
+        MeetingsMinutes m =  meetingsMinutesMapper.selectOne(
                 new QueryWrapper<MeetingsMinutes>().eq("meetings_minutes_id",meetingMinutesId)
-        ).getMeetingRecord();
+        );
+        return null;
     }
 }
 

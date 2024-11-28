@@ -29,7 +29,7 @@ public class Meeting implements Serializable {
     /**
      * 会议id
      */
-    //@JsonSerialize(using = ToStringSerializer.class)
+    @JsonSerialize(using = ToStringSerializer.class)
     @TableId(type = IdType.AUTO)
     private Long meetingId;
 

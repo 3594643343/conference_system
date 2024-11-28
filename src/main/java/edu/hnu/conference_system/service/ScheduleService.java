@@ -13,7 +13,7 @@ public interface ScheduleService extends IService<Schedule> {
 
     Result add(Long userId, JoinMeetingDto joinMeetingDto);
 
-    Result join(Long meetingId,String meetingnumber);
+    Result join(String meetingnumber);
 
-    Result cancel(Long userId, Long meetingId);
+    Result cancel(Long userId, String meetingNumber);
 }

@@ -42,4 +42,6 @@ public interface MeetingService extends IService<Meeting> {
     void turnOnMeeting(Long meetingId);
 
     Meeting selectById(Long meetingId);
+
+    Long getMeetingIdByNumber(String meetingNumber);
 }

@@ -36,8 +36,8 @@ public class MeetingController {
 
     @GetMapping("/userlist")
     @Operation(summary = "在会用户信息(id、头像,昵称,个性签名)")
-    public Result getUserInfo(@RequestBody Map<String,String> request){
-        return roomService.getUserInfo(request);
+    public Result getUserInfo(@RequestParam("meetingNumber") String meetingNumber){
+        return roomService.getUserInfo(meetingNumber);
     }
 
     @PutMapping("/mute")

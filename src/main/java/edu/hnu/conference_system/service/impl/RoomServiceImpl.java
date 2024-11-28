@@ -385,10 +385,10 @@ public class RoomServiceImpl implements RoomService {
      * @return
      */
     @Override
-    public Result getUserInfo(Map<String,String> request) {
+    public Result getUserInfo(String meetingNumber) {
         List<UserInfoVo> userInfoVos = new ArrayList<>();
         for (Room room : roomList) {
-            if(room.getMeetingNumber().equals(request.get("meetingNumber"))) {
+            if(room.getMeetingNumber().equals(meetingNumber)) {
                 System.out.println("找到房间");
                 for(User user : room.getMembersOn()) {
                     System.out.println("找到人");

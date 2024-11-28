@@ -29,7 +29,7 @@ public interface RoomService {
 
     Result leaveMeeting();
 
-    Result getUserInfo(Map<String,String> request);
+    Result getUserInfo(String meetingNumber);
 
     Result mute(MuteDto muteDto);
 

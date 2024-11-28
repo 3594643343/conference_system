@@ -57,10 +57,10 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper, Schedule>
     }
 
     @Override
-    public Result join(Long meetingId,String meetingnumber) {
+    public Result join(String meetingnumber) {
         Result r = roomService.joinFromSchedule(meetingnumber);
         if( r.getCode() == 1){
-            cancel(UserHolder.getUserId(),meetingId);
+            cancel(UserHolder.getUserId(),meetingnumber);
             return r;
         }
         else{
@@ -68,11 +68,16 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper, Schedule>
         }
     }
 
-    @Override
-    public Result cancel(Long userId, Long meetingId) {
+    private Result cancel(Long userId,Long meetingId){
         scheduleMapper.delete(
                 new QueryWrapper<Schedule>().eq("user_id",userId).eq("meeting_id",meetingId)
-        );
+                );
         return show(userId);
+    }
+
+    @Override
+    public Result cancel(Long userId, String meetingNumber) {
+        Long meetingId = meetingService.getMeetingIdByNumber(meetingNumber);
+        return cancel(userId,meetingId);
     }
 }

@@ -66,6 +66,17 @@ public class MeetingServiceImpl extends ServiceImpl<MeetingMapper, Meeting>
         return meetingMapper.selectById(meetingId);
     }
 
+    @Override
+    public Long getMeetingIdByNumber(String meetingNumber) {
+        Meeting meeting = meetingMapper.selectOne(
+                new QueryWrapper<Meeting>().eq("meeting_number",meetingNumber)
+        );
+        if(meeting == null){
+            return null;
+        }
+        return meeting.getMeetingId();
+    }
+
 
     @Override
     public ScheduleShowVo buildSceduleShowVoById(Long meetingId) {

@@ -33,13 +33,13 @@ public class ScheduleController {
 
         @GetMapping("/join")
         @Operation(summary = "加入日程会议")
-        public Result joinSchedule(@RequestParam("meetingId") Long meetingId,@RequestParam("meetingnumber") String meetingnumber) {
-            return scheduleService.join(meetingId,meetingnumber);
+        public Result joinSchedule(@RequestParam("meetingnumber") String meetingnumber) {
+            return scheduleService.join(meetingnumber);
         }
 
         @DeleteMapping("/cancle")
         @Operation(summary = "取消日程")
-        public Result cancelSchedule(@RequestParam("meetingid") Long meetingId) {
-            return scheduleService.cancel(UserHolder.getUserId(),meetingId);
+        public Result cancelSchedule(@RequestParam("meetingNumber") String meetingNumber) {
+            return scheduleService.cancel(UserHolder.getUserId(),meetingNumber);
         }
     }

@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import xunfei_api.IatModelZhMain;
 
+import java.net.InetAddress;
+
 import static xunfei_api.IatModelZhMain.*;
 
 @MapperScan("edu.hnu.conference_system.mapper")
@@ -17,6 +19,8 @@ public class ConferenceSystemApplication {
 	//private static IatModelZhMain voiceToText;
 
 	public static void main(String[] args) throws Exception {
+		String IP = InetAddress.getLocalHost().getHostAddress();
+		System.out.println("ip为:"+IP);
 		SpringApplication.run(ConferenceSystemApplication.class, args);
 		// 调用语音转写功能
 		//voiceToText.VoiceToText(args);

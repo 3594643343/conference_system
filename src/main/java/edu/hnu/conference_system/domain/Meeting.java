@@ -8,9 +8,14 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * 
@@ -24,6 +29,7 @@ public class Meeting implements Serializable {
     /**
      * 会议id
      */
+    //@JsonSerialize(using = ToStringSerializer.class)
     @TableId(type = IdType.AUTO)
     private Long meetingId;
 

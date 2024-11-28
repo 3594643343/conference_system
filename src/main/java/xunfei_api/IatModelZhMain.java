@@ -6,17 +6,12 @@ import okhttp3.*;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.util.Date;
 
 /**
@@ -24,53 +19,45 @@ import java.util.Date;
  */
 
 public class IatModelZhMain extends WebSocketListener {
-    public static final String hostUrl = "https://iat.xf-yun.com/v1"; // 注意中文识别的地址
-    private static final String appid = "aa28c385"; //在控制台-我的应用获取
+    //public static final String hostUrl = "https://iat.xf-yun.com/v1"; // 注意中文识别的地址
+    public static final String hostUrl = "https://iat-api.xfyun.cn/v2/iat"; // 注意中文识别的地址
+    /*private static final String appid = "aa28c385"; //在控制台-我的应用获取
     public static final String apiSecret = "Yjk2ZmE2YWE0MzZiZTdlNjJlMWFhNDc2"; // 在控制台-我的应用获取
-    public static final String apiKey = "19d192fdf2c9a2e3fc58bb1864bf124a"; // 在控制台-我的应用获取
-    private static final String file = "D:\\Third\\big_modle\\conference_system\\src\\main\\resources\\iat\\16k_10.pcm"; // 识别音频位置
-    public static final int StatusFirstFrame = 0;
+    public static final String apiKey = "19d192fdf2c9a2e3fc58bb1864bf124a"; // 在控制台-我的应用获取*/
+    private static final String appid = "97851773"; //在控制台-我的应用获取
+    public static final String apiSecret = "OWRmNDFhZGQ4Njc4NWU0NmYxODllMzQ0"; // 在控制台-我的应用获取
+    public static final String apiKey = "ed6eb791c33bf6375605a17b8d083d6a"; // 在控制台-我的应用获取
+    //private static final String file = "D:\\Third\\big_modle\\conference_system\\src\\main\\resources\\iat\\16k_10.pcm"; // 识别音频位置
+    public  final int StatusFirstFrame = 0;
     public static final int StatusContinueFrame = 1;
     public static final int StatusLastFrame = 2;
     public static final Gson gson = new Gson();
     // 开始时间
-    private static Date dateBegin = new Date();
+    private  Date dateBegin = new Date();
     // 结束时间
-    private static Date dateEnd = new Date();
+    private  Date dateEnd = new Date();
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd HH:mm:ss.SSS");
 
     private static List<String> totalResultList = new ArrayList<>();
+    private static ByteArrayInputStream inputStream;
 
 
-    public long getPCMFileSize(String filePath) {
-        File file = new File(filePath);
-        if (file.exists() && file.isFile()) {
-            try {
-                return file.length();
-            } catch (SecurityException e) {
-                System.err.println("没有权限访问该文件: " + e.getMessage());
-            }
-        } else {
-            System.err.println("指定的文件不存在或者不是一个常规文件");
-        }
-        return -1;  // 如果出现问题返回 -1表示获取失败
-    }
     @Override
     public void onOpen(WebSocket webSocket, Response response) {
         super.onOpen(webSocket, response);
         new Thread(() -> {
             //连接成功，开始发送数据
-            int frameSize = (int)(1280>getPCMFileSize(file)?getPCMFileSize(file):1280); //每一帧音频的大小,建议每 40ms 发送 122B
-            int intervel = 40;
+            int frameSize = (int)(inputStream.available()/10); //每一帧音频的大小,建议每 40ms 发送 122B
+            int intervel = 50;
             int status = 0;  // 音频的状态
             int seq = 0; //数据序号
-            try (FileInputStream fs = new FileInputStream(file)) {
+            try {
                 byte[] buffer = new byte[frameSize];
                 // 发送音频
                 end:
                 while (true) {
                     seq++; // 每次循环更新下seq
-                    int len = fs.read(buffer);
+                    int len = inputStream.read(buffer);
                     if (len == -1) {
                         status = StatusLastFrame;  //文件读完，改变status 为 2
                     }
@@ -290,7 +277,7 @@ public class IatModelZhMain extends WebSocketListener {
         }
     }
 
-    public static void VoiceToText(String[] args) throws Exception {
+    public void VoiceToText(ByteArrayOutputStream pcmStream) throws Exception {
         // 构建鉴权url
         String authUrl = getAuthUrl(hostUrl, apiKey, apiSecret);
         OkHttpClient client = new OkHttpClient.Builder().build();
@@ -299,11 +286,14 @@ public class IatModelZhMain extends WebSocketListener {
         //System.out.println(url);
         Request request = new Request.Builder().url(url).build();
         // System.out.println(client.newCall(request).execute());
-        //System.out.println("url===>" + url);
+        //System.out.println("url===>" + url);sss
+        //System.out.println(pcmStream.toString().length());
+        this.inputStream = new ByteArrayInputStream(pcmStream.toByteArray());
+
         WebSocket webSocket = client.newWebSocket(request, new IatModelZhMain());
     }
 
-    public static String getAuthUrl(String hostUrl, String apiKey, String apiSecret) throws Exception {
+    public String getAuthUrl(String hostUrl, String apiKey, String apiSecret) throws Exception {
         URL url = new URL(hostUrl);
         SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
         format.setTimeZone(TimeZone.getTimeZone("GMT"));

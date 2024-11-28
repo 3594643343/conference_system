@@ -2,25 +2,20 @@ package edu.hnu.conference_system.socket;
 
 
 import cn.hutool.core.io.IoUtil;
-import edu.hnu.conference_system.domain.User;
-import edu.hnu.conference_system.holder.UserHolder;
+import cn.hutool.core.util.ObjectUtil;
 import edu.hnu.conference_system.service.RoomService;
 import edu.hnu.conference_system.service.UserInfoService;
 import edu.hnu.conference_system.utils.PcmCovWavUtil;
-import jakarta.annotation.Resource;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import xunfei_api.IatModelZhMain;
 
 import java.io.*;
-import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -111,7 +106,7 @@ public class WebSocketAudioServer {
     }
 
     @OnMessage(maxMessageSize = 5242880)
-    public void onMessage(@PathParam(value = "userId") Long userId, ByteBuffer message) throws IOException {
+    public void onMessage(@PathParam(value = "userId") Long userId, ByteBuffer message) throws Exception {
         //音频分发
         broadcast2All(message);
         //System.out.println(message.array().length);
@@ -124,11 +119,28 @@ public class WebSocketAudioServer {
         if(byteArrayOutputStreamConcurrentHashMap.get(userId).size()>61071360) {
             //System.out.println("过大");
             go2Disk();
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            byteArrayOutputStreamConcurrentHashMap.put(this.userId, byteArrayOutputStream);
+            ByteArrayOutputStream newByteArrayOutputStream = new ByteArrayOutputStream();
+            byteArrayOutputStreamConcurrentHashMap.put(this.userId, newByteArrayOutputStream);
 
         }
 
+        //临时存储,用于语音转文字
+       /* ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        byte[] bytes = message.array();
+        try {
+            byteArrayOutputStream.write(bytes);
+        } catch (IOException e) {
+            try {
+                byteArrayOutputStream.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
+            return;
+        }
+        ByteArrayOutputStream pcmStream = new ByteArrayOutputStream();
+        PcmCovWavUtil.convertWaveFile(byteArrayOutputStream, pcmStream);
+        Audio2Text(pcmStream);*/
 
     }
     /**
@@ -137,25 +149,25 @@ public class WebSocketAudioServer {
      * @param message ByteBuffer
      */
     private void appendBuffer(ByteBuffer message) throws IOException {
-         ByteArrayOutputStream byteArrayOutputStream = byteArrayOutputStreamConcurrentHashMap.get(this.userId);
-         if (byteArrayOutputStream == null) {
+        ByteArrayOutputStream byteArrayOutputStream = byteArrayOutputStreamConcurrentHashMap.get(userId);
+        if (ObjectUtil.isEmpty(byteArrayOutputStream)) {
             byteArrayOutputStream = new ByteArrayOutputStream();
-         }
+        }
 
         byte[] bytes = message.array();
-
+        try {
+            byteArrayOutputStream.write(bytes);
+        } catch (IOException e) {
             try {
-                byteArrayOutputStream.write(bytes);
-            } catch (IOException e) {
-                try {
-                    byteArrayOutputStream.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-                e.printStackTrace();
-                return;
+                byteArrayOutputStream.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
-        byteArrayOutputStreamConcurrentHashMap.put(this.userId, byteArrayOutputStream);
+            e.printStackTrace();
+            return;
+        }
+
+        byteArrayOutputStreamConcurrentHashMap.put(userId, byteArrayOutputStream);
     }
 
     /**
@@ -263,5 +275,11 @@ public class WebSocketAudioServer {
 
     protected Session getSession() {
         return this.session;
+    }
+
+    private void Audio2Text(ByteArrayOutputStream outputStream) throws Exception {
+        IatModelZhMain iatModelZhMain = new IatModelZhMain();
+        System.out.println(outputStream.toString().length());
+        iatModelZhMain.VoiceToText(outputStream);
     }
 }

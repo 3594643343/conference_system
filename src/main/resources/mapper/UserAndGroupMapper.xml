@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.hnu.conference_system.mapper.UserAndGroupMapper">
+
+    <resultMap id="BaseResultMap" type="edu.hnu.conference_system.domain.UserAndGroup">
+            <id property="userId" column="user_id" jdbcType="INTEGER"/>
+            <id property="groupId" column="group_id" jdbcType="INTEGER"/>
+            <result property="isIn" column="is_in" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        user_id,group_id,is_in
+    </sql>
+</mapper>

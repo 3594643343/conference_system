@@ -6,7 +6,7 @@
 
     <resultMap id="BaseResultMap" type="edu.hnu.conference_system.domain.Schedule">
             <id property="meetingId" column="meeting_id" jdbcType="BIGINT"/>
-            <id property="userId" column="user_id" jdbcType="BIGINT"/>
+            <id property="userId" column="user_id" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">

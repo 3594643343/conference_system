@@ -9,11 +9,11 @@ import edu.hnu.conference_system.result.Result;
 public interface ScheduleService extends IService<Schedule> {
 
 
-    Result show(Long userId);
+    Result show(Integer userId);
 
-    Result add(Long userId, JoinMeetingDto joinMeetingDto);
+    Result add(Integer userId, JoinMeetingDto joinMeetingDto);
 
     Result join(String meetingnumber);
 
-    Result cancel(Long userId, String meetingNumber);
+    Result cancel(Integer userId, String meetingNumber);
 }

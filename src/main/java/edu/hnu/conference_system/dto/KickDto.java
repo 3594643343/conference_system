@@ -12,7 +12,7 @@ public class KickDto {
     /**
      * 要踢的人的id
      */
-    private Long id;
+    private Integer id;
     /**
      * 所在会议
      */

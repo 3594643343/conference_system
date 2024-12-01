@@ -40,7 +40,7 @@ public class UserRecordServiceImpl extends ServiceImpl<UserRecordMapper, UserRec
     private MeetingAudioService meetingAudioService;
 
     @Override
-    public Result getRecordList(Long userId) {
+    public Result getRecordList(Integer userId) {
         List<RecordVo> recordVos = new ArrayList<>();
         List<UserRecord> userRecords = userRecordMapper.selectList(
                 new QueryWrapper<UserRecord>().eq("user_id", userId)
@@ -52,9 +52,9 @@ public class UserRecordServiceImpl extends ServiceImpl<UserRecordMapper, UserRec
             RecordVo recordVo = meetingService.buildRecordVoById(meetingId);
             recordVo.setRecordId(userRecord.getUserRecordId());
 
-            List<Long> usersIds = userInMeetingService.getUsersIdsFromMeetingId(meetingId);
+            List<Integer> usersIds = userInMeetingService.getUsersIdsFromMeetingId(meetingId);
 
-            for(Long usersId : usersIds){
+            for(Integer usersId : usersIds){
                 recordVo.getParticipants().add(userInfoService.getNameById(usersId));
             }
             recordVos.add(recordVo);
@@ -94,7 +94,7 @@ public class UserRecordServiceImpl extends ServiceImpl<UserRecordMapper, UserRec
     }
 
     @Override
-    public void insertRecord(Long userId, Long meetingId) {
+    public void insertRecord(Integer userId, Long meetingId) {
         UserRecord userRecord = new UserRecord();
         userRecord.setUserId(userId);
         userRecord.setMeetingId(meetingId);

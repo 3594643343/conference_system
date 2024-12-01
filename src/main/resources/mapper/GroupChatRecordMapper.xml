@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.hnu.conference_system.mapper.GroupChatRecordMapper">
+
+    <resultMap id="BaseResultMap" type="edu.hnu.conference_system.domain.GroupChatRecord">
+            <id property="groupId" column="group_id" jdbcType="INTEGER"/>
+            <result property="speakerId" column="speaker_id" jdbcType="INTEGER"/>
+            <result property="text" column="text" jdbcType="VARCHAR"/>
+            <result property="time" column="time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        group_id,speaker_id,text,
+        time
+    </sql>
+</mapper>

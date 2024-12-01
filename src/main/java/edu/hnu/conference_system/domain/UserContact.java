@@ -8,31 +8,27 @@ import lombok.Data;
 
 /**
  * 
- * @TableName record
+ * @TableName user_contact
  */
-@TableName(value ="record")
+@TableName(value ="user_contact")
 @Data
-public class Record implements Serializable {
+public class UserContact implements Serializable {
     /**
      * 
      */
     @TableId
-    private Long recordId;
-
-    /**
-     * 
-     */
     private Integer userId;
 
     /**
      * 
      */
-    private Long meetingId;
+    //@TableId
+    private Integer userfriendId;
 
     /**
      * 
      */
-    private String recordPath;
+    private Integer isFriend;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
@@ -48,21 +44,19 @@ public class Record implements Serializable {
         if (getClass() != that.getClass()) {
             return false;
         }
-        Record other = (Record) that;
-        return (this.getRecordId() == null ? other.getRecordId() == null : this.getRecordId().equals(other.getRecordId()))
-            && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
-            && (this.getMeetingId() == null ? other.getMeetingId() == null : this.getMeetingId().equals(other.getMeetingId()))
-            && (this.getRecordPath() == null ? other.getRecordPath() == null : this.getRecordPath().equals(other.getRecordPath()));
+        UserContact other = (UserContact) that;
+        return (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
+            && (this.getUserfriendId() == null ? other.getUserfriendId() == null : this.getUserfriendId().equals(other.getUserfriendId()))
+            && (this.getIsFriend() == null ? other.getIsFriend() == null : this.getIsFriend().equals(other.getIsFriend()));
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((getRecordId() == null) ? 0 : getRecordId().hashCode());
         result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
-        result = prime * result + ((getMeetingId() == null) ? 0 : getMeetingId().hashCode());
-        result = prime * result + ((getRecordPath() == null) ? 0 : getRecordPath().hashCode());
+        result = prime * result + ((getUserfriendId() == null) ? 0 : getUserfriendId().hashCode());
+        result = prime * result + ((getIsFriend() == null) ? 0 : getIsFriend().hashCode());
         return result;
     }
 
@@ -72,10 +66,9 @@ public class Record implements Serializable {
         sb.append(getClass().getSimpleName());
         sb.append(" [");
         sb.append("Hash = ").append(hashCode());
-        sb.append(", recordId=").append(recordId);
         sb.append(", userId=").append(userId);
-        sb.append(", meetingId=").append(meetingId);
-        sb.append(", recordPath=").append(recordPath);
+        sb.append(", userfriendId=").append(userfriendId);
+        sb.append(", isFriend=").append(isFriend);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

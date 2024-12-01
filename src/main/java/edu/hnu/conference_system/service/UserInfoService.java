@@ -28,9 +28,9 @@ public interface UserInfoService extends IService<UserInfo> {
 
     Result userRegister(String userName,String userEmail ,String userPassword, String checkPassword) throws IOException;
 
-    UserInfoVo buildUserInfoVo(Long id);
+    UserInfoVo buildUserInfoVo(Integer id);
 
-    String getNameById(Long userId);
+    String getNameById(Integer userId);
 
     Result changeUserInfo(UserInfoDto userInfoDto);
 
@@ -38,9 +38,9 @@ public interface UserInfoService extends IService<UserInfo> {
 
     Result changeAvatar(MultipartFile avatar) throws IOException;
 
-    Result resetPassword(Long userId);
+    Result resetPassword(Integer userId);
 
-    Long getMeetingIdByUserId(Long userId);
+    Long getMeetingIdByUserId(Integer userId);
 
 
     //Result getUserInfo(Long );

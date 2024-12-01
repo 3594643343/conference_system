@@ -174,13 +174,13 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
 
         boolean saveResult = this.save(userInfo);
         if (!saveResult) {
-            return Result.error("内部错误!");
+            return Result.error("内部错误:新增用户失败!");
         }
         String avatarPath = filePath+"/"+userInfo.getUserId()+".jpg";
         userInfo.setAvatarPath(avatarPath);
         boolean f = setDefaultAvatar(avatarPath);
         if(!f){
-            return Result.error("内部错误!");
+            return Result.error("内部错误:设置默认头像失败!");
         }
         userMapper.update(userInfo, new UpdateWrapper<UserInfo>().eq("user_id", userInfo.getUserId()));
         return Result.success(userInfo.getUserId());
@@ -199,7 +199,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         return true;
     }
 
-    public UserInfoVo buildUserInfoVo(Long id) {
+    public UserInfoVo buildUserInfoVo(Integer id) {
         UserInfoVo userInfoVo = new UserInfoVo();
 
         UserInfo userInfo = userMapper.selectOne(
@@ -213,7 +213,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     }
 
     @Override
-    public String getNameById(Long userId) {
+    public String getNameById(Integer userId) {
         UserInfo u = userMapper.selectById(userId);
         return u.getUserName();
     }
@@ -298,7 +298,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     }
 
     @Override
-    public Result resetPassword(Long userId) {
+    public Result resetPassword(Integer userId) {
         UserInfo userInfo = userMapper.selectById(userId);
         //将密码重置为123456
         userInfo.setUserPassword(EncryptedPassword("123456"));
@@ -307,7 +307,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     }
 
     @Override
-    public Long getMeetingIdByUserId(Long userId) {
+    public Long getMeetingIdByUserId(Integer userId) {
         for(User user:userList){
             if(user.getId().equals(userId)){
                 return user.getMeetingId();

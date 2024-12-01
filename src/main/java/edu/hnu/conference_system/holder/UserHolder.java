@@ -25,13 +25,13 @@ public class UserHolder {
         THREAD_LOCAL.set(info);
     }
 
-    public static Long getUserId() {
+    public static Integer getUserId() {
         UserDto dto = THREAD_LOCAL.get();
         if (dto != null) {
             return dto.getUserId();
         } else {
             // 注册或登录时没有，返回 0
-            return 0L;
+            return 0;
         }
     }
 

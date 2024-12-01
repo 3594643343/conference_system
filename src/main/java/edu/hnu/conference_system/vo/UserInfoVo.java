@@ -12,7 +12,7 @@ public class UserInfoVo {
     /**
      * 用户id
      */
-    private Long id;
+    private Integer id;
     /**
      * 用户名
      */

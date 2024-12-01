@@ -3,37 +3,36 @@ package edu.hnu.conference_system.domain;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
+import java.io.Serial;
 import java.io.Serializable;
 import lombok.Data;
 
 /**
  * 
- * @TableName record
+ * @TableName user_and_group
  */
-@TableName(value ="record")
+@TableName(value ="user_and_group")
 @Data
-public class Record implements Serializable {
+public class UserAndGroup implements Serializable {
     /**
      * 
      */
-    @TableId
-    private Long recordId;
-
-    /**
-     * 
-     */
+    //@TableId
     private Integer userId;
 
     /**
      * 
      */
-    private Long meetingId;
+    @TableId
+    private Integer groupId;
 
     /**
      * 
      */
-    private String recordPath;
+    private Integer isIn;
 
+    @Serial
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
@@ -48,21 +47,19 @@ public class Record implements Serializable {
         if (getClass() != that.getClass()) {
             return false;
         }
-        Record other = (Record) that;
-        return (this.getRecordId() == null ? other.getRecordId() == null : this.getRecordId().equals(other.getRecordId()))
-            && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
-            && (this.getMeetingId() == null ? other.getMeetingId() == null : this.getMeetingId().equals(other.getMeetingId()))
-            && (this.getRecordPath() == null ? other.getRecordPath() == null : this.getRecordPath().equals(other.getRecordPath()));
+        UserAndGroup other = (UserAndGroup) that;
+        return (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
+            && (this.getGroupId() == null ? other.getGroupId() == null : this.getGroupId().equals(other.getGroupId()))
+            && (this.getIsIn() == null ? other.getIsIn() == null : this.getIsIn().equals(other.getIsIn()));
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((getRecordId() == null) ? 0 : getRecordId().hashCode());
         result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
-        result = prime * result + ((getMeetingId() == null) ? 0 : getMeetingId().hashCode());
-        result = prime * result + ((getRecordPath() == null) ? 0 : getRecordPath().hashCode());
+        result = prime * result + ((getGroupId() == null) ? 0 : getGroupId().hashCode());
+        result = prime * result + ((getIsIn() == null) ? 0 : getIsIn().hashCode());
         return result;
     }
 
@@ -72,10 +69,9 @@ public class Record implements Serializable {
         sb.append(getClass().getSimpleName());
         sb.append(" [");
         sb.append("Hash = ").append(hashCode());
-        sb.append(", recordId=").append(recordId);
         sb.append(", userId=").append(userId);
-        sb.append(", meetingId=").append(meetingId);
-        sb.append(", recordPath=").append(recordPath);
+        sb.append(", groupId=").append(groupId);
+        sb.append(", isIn=").append(isIn);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

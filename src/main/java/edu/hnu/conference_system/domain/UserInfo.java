@@ -20,8 +20,7 @@ public class UserInfo implements Serializable {
      * 
      */
     @TableId(type = IdType.AUTO)
-    private Long userId;
-
+    private Integer userId;
     /**
      * 
      */

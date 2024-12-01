@@ -11,7 +11,7 @@ public class MuteDto {
     /**
      * 要禁言的用户id
      */
-    private Long userId;
+    private Integer userId;
     /**
      * 所在的会议号
      */

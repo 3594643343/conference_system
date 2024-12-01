@@ -28,7 +28,7 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper, Schedule>
     private RoomService roomService;
 
     @Override
-    public Result show(Long userId) {
+    public Result show(Integer userId) {
         List<ScheduleShowVo> scheduleShowVos =new ArrayList<>();
         List<Schedule> schedules = scheduleMapper.selectList(
                 new QueryWrapper<Schedule>().eq("user_id",userId)
@@ -40,7 +40,7 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper, Schedule>
     }
 
     @Override
-    public Result add(Long userId, JoinMeetingDto joinMeetingDto) {
+    public Result add(Integer userId, JoinMeetingDto joinMeetingDto) {
         Long meetingId = meetingService.validate(joinMeetingDto.getMeetingNumber(),joinMeetingDto.getMeetingPassword());
 
         Schedule s = scheduleMapper.selectOne(
@@ -68,7 +68,7 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper, Schedule>
         }
     }
 
-    private Result cancel(Long userId,Long meetingId){
+    private Result cancel(Integer userId,Long meetingId){
         scheduleMapper.delete(
                 new QueryWrapper<Schedule>().eq("user_id",userId).eq("meeting_id",meetingId)
                 );
@@ -76,7 +76,7 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper, Schedule>
     }
 
     @Override
-    public Result cancel(Long userId, String meetingNumber) {
+    public Result cancel(Integer userId, String meetingNumber) {
         Long meetingId = meetingService.getMeetingIdByNumber(meetingNumber);
         return cancel(userId,meetingId);
     }

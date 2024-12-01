@@ -23,7 +23,7 @@ public class Schedule implements Serializable {
      * 
      */
     //@TableId
-    private Long userId;
+    private Integer userId;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

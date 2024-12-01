@@ -51,7 +51,7 @@ public class AdminController {
 
     @GetMapping("/reset")
     @Operation(summary = "重置密码")
-    public Result resetPassword(@RequestParam("userId") Long userId) {
+    public Result resetPassword(@RequestParam("userId") Integer userId) {
         return userInfoService.resetPassword(userId);
     }
 }

@@ -44,7 +44,7 @@ public class Room {
     /**
      * 房主id
      */
-    private Long createrId;
+    private Integer createrId;
 
     /**
      * 现在在房间的成员
@@ -54,7 +54,7 @@ public class Room {
     /**
      * 所有加入过房间的成员id
      */
-    private List<Long> MembersAll;
+    private List<Integer> MembersAll;
 
 
     @Override

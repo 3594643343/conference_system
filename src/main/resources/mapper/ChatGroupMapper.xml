@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.hnu.conference_system.mapper.ChatGroupMapper">
+
+    <resultMap id="BaseResultMap" type="edu.hnu.conference_system.domain.ChatGroup">
+            <id property="groupId" column="group_id" jdbcType="INTEGER"/>
+            <result property="groupCreatorId" column="group_creator_id" jdbcType="INTEGER"/>
+            <result property="groupName" column="group_name" jdbcType="CHAR"/>
+            <result property="groupCreateTime" column="group_create_time" jdbcType="TIMESTAMP"/>
+            <result property="groupAvatarPath" column="group_avatar_path" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        group_id,group_creator_id,group_name,
+        group_create_time,group_avatar_path
+    </sql>
+</mapper>

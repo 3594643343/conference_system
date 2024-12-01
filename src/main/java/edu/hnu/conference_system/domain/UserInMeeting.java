@@ -17,7 +17,7 @@ public class UserInMeeting implements Serializable {
      * 
      */
     @TableId
-    private Long userId;
+    private Integer userId;
 
     /**
      * 

@@ -13,11 +13,11 @@ import java.io.IOException;
 */
 public interface UserRecordService extends IService<UserRecord> {
 
-    Result getRecordList(Long userId);
+    Result getRecordList(Integer userId);
 
     Result deleteRecord(Long recordId);
 
     Result getRecordDetail(Long recordId) throws IOException;
 
-    void insertRecord(Long userId, Long meetingId);
+    void insertRecord(Integer userId, Long meetingId);
 }

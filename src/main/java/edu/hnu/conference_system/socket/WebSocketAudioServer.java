@@ -14,6 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import xunfei_api.IatModelZhMain;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.Objects;
@@ -27,18 +31,20 @@ import static org.apache.pdfbox.io.IOUtils.toByteArray;
 @Slf4j
 @ServerEndpoint("/meeting/audio/{userId}")
 public class WebSocketAudioServer {
-    private static ConcurrentHashMap<Long, WebSocketAudioServer> meetingUsers = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Integer, WebSocketAudioServer> meetingUsers = new ConcurrentHashMap<>();
     private static CopyOnWriteArraySet<WebSocketAudioServer> webSocketSet = new CopyOnWriteArraySet<>();
     /**
      * 并发容器 存储 字节临时缓冲区
      */
-    private static ConcurrentHashMap<Long, ByteArrayOutputStream> byteArrayOutputStreamConcurrentHashMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Integer, ByteArrayOutputStream> byteArrayOutputStreamConcurrentHashMap = new ConcurrentHashMap<>();
 
 
     private Session session;
-    private Long userId;
+    private Integer userId;
     private Long meetingId;
     private String wavPath;
+
+    private int voiceTime;
 
     private static String audioPath;
     private static UserInfoService userInfoService;
@@ -63,7 +69,9 @@ public class WebSocketAudioServer {
     }
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("userId") Long userId) throws IOException {
+    public void onOpen(Session session, @PathParam("userId") Integer userId) throws IOException {
+        this.voiceTime = 0;
+
         this.session = session;
         meetingUsers.put(userId, this);
         webSocketSet.add(this);
@@ -71,7 +79,7 @@ public class WebSocketAudioServer {
         this.meetingId = meetingId;
         this.userId = userId;
         String dirPath = audioPath+"/"+meetingId;
-        System.out.println(dirPath);
+        //System.out.println(dirPath);
         File dir = new File(dirPath);
         if(!dir.exists()){
             if(!dir.mkdirs()){
@@ -91,6 +99,7 @@ public class WebSocketAudioServer {
 
     @OnClose
     public void onClose() throws IOException {
+        this.voiceTime = 0;
         go2Disk();
         audioMake();
         meetingUsers.remove(this.userId);
@@ -125,7 +134,7 @@ public class WebSocketAudioServer {
         }
 
         //临时存储,用于语音转文字
-       /* ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        /*ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         byte[] bytes = message.array();
         try {
             byteArrayOutputStream.write(bytes);
@@ -140,7 +149,10 @@ public class WebSocketAudioServer {
         }
         ByteArrayOutputStream pcmStream = new ByteArrayOutputStream();
         PcmCovWavUtil.convertWaveFile(byteArrayOutputStream, pcmStream);
+
         Audio2Text(pcmStream);*/
+
+
 
     }
     /**
@@ -280,6 +292,47 @@ public class WebSocketAudioServer {
     private void Audio2Text(ByteArrayOutputStream outputStream) throws Exception {
         IatModelZhMain iatModelZhMain = new IatModelZhMain();
         System.out.println(outputStream.toString().length());
-        iatModelZhMain.VoiceToText(outputStream);
+        if(this.voiceTime ==0) {
+            iatModelZhMain.VoiceToText(reSampling(outputStream.toByteArray()));
+        }
+        else{
+            iatModelZhMain.nextVoice(reSampling(outputStream.toByteArray()));
+        }
+        this.voiceTime++;
+    }
+
+    private ByteArrayOutputStream reSampling(byte[] data) throws IOException, UnsupportedAudioFileException {
+
+        AudioInputStream audioIn = AudioSystem.getAudioInputStream(new ByteArrayInputStream(data));
+
+        AudioFormat srcFormat = audioIn.getFormat();
+        int targetSampleRate = 16000;
+
+        //System.out.println(srcFormat.getSampleRate());
+
+        AudioFormat dstFormat = new AudioFormat(srcFormat.getEncoding(),
+                targetSampleRate,
+                srcFormat.getSampleSizeInBits(),
+                srcFormat.getChannels(),
+                srcFormat.getFrameSize(),
+                srcFormat.getFrameRate(),
+                srcFormat.isBigEndian());
+
+
+        AudioInputStream convertedIn = AudioSystem.getAudioInputStream(dstFormat, audioIn);
+
+        int numReads = -1;
+
+        int BUFF_SIZE = targetSampleRate/2;
+
+        byte [] buff = new byte[BUFF_SIZE];
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        while ((numReads = convertedIn.read(buff)) !=-1)
+        {
+            System.out.println("读入字节数:"+ numReads);
+            outputStream.write(buff);
+        }
+        return outputStream;
     }
 }

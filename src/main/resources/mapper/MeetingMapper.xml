@@ -6,7 +6,7 @@
 
     <resultMap id="BaseResultMap" type="edu.hnu.conference_system.domain.Meeting">
             <id property="meetingId" column="meeting_id" jdbcType="BIGINT"/>
-            <result property="userId" column="user_id" jdbcType="BIGINT"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
             <result property="meetingsMinutesId" column="meetings_minutes_id" jdbcType="BIGINT"/>
             <result property="recordId" column="record_id" jdbcType="BIGINT"/>
             <result property="meetingAudioId" column="meeting_audio_id" jdbcType="BIGINT"/>

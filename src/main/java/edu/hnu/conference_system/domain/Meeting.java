@@ -36,7 +36,7 @@ public class Meeting implements Serializable {
     /**
      * 创建者id
      */
-    private Long userId;
+    private Integer userId;
 
     /**
      * 纪要id
@@ -106,7 +106,7 @@ public class Meeting implements Serializable {
 
 
     public Meeting(String meetingName,String meetingNumber,String meetingPassword,
-                   Long createrId,LocalDateTime startTime,LocalDateTime endTime, Integer defaultPermission)
+                   Integer createrId,LocalDateTime startTime,LocalDateTime endTime, Integer defaultPermission)
     {
         this.meetingName = meetingName;
         this.meetingNumber = meetingNumber;
@@ -119,7 +119,7 @@ public class Meeting implements Serializable {
         this.meetingState = "off";
     }
     public Meeting(String meetingName,String meetingNumber,
-                   Long createrId,LocalDateTime startTime )
+                   Integer createrId,LocalDateTime startTime )
     {
         this.meetingName = meetingName;
         this.meetingNumber = meetingNumber;

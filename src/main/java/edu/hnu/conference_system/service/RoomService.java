@@ -45,7 +45,7 @@ public interface RoomService {
 
     Result joinFromSchedule(String meetingNumber);
 
-    List<Long> getOnMeetingUserId(Long meetingId);
+    List<Integer> getOnMeetingUserId(Long meetingId);
 
     String getAudioPath();
 

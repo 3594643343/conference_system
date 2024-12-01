@@ -12,7 +12,7 @@ public class PmChangeDto {
     /**
      * 要修改的用户id
      */
-    private Long id;
+    private Integer id;
 
     /**
      * 所在的会议号

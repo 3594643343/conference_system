@@ -19,8 +19,8 @@ import java.util.Date;
  */
 
 public class IatModelZhMain extends WebSocketListener {
-    //public static final String hostUrl = "https://iat.xf-yun.com/v1"; // 注意中文识别的地址
-    public static final String hostUrl = "https://iat-api.xfyun.cn/v2/iat"; // 注意中文识别的地址
+    public static final String hostUrl = "https://iat.xf-yun.com/v1"; // 注意中文识别的地址
+    //public static final String hostUrl = "https://iat-api.xfyun.cn/v2/iat"; // 注意中文识别的地址
     /*private static final String appid = "aa28c385"; //在控制台-我的应用获取
     public static final String apiSecret = "Yjk2ZmE2YWE0MzZiZTdlNjJlMWFhNDc2"; // 在控制台-我的应用获取
     public static final String apiKey = "19d192fdf2c9a2e3fc58bb1864bf124a"; // 在控制台-我的应用获取*/
@@ -48,6 +48,7 @@ public class IatModelZhMain extends WebSocketListener {
         new Thread(() -> {
             //连接成功，开始发送数据
             int frameSize = (int)(inputStream.available()/10); //每一帧音频的大小,建议每 40ms 发送 122B
+            System.out.println("帧大小:   "+frameSize);
             int intervel = 50;
             int status = 0;  // 音频的状态
             int seq = 0; //数据序号
@@ -121,7 +122,7 @@ public class IatModelZhMain extends WebSocketListener {
                                     "}";
                             webSocket.send(json);
                             // System.err.println(json);
-                            // System.out.println("中间帧音频发送中...");
+                            System.out.println("中间帧音频发送中...");
                             break;
                         case StatusLastFrame:    // 最后一帧音频status = 2 ，标志音频发送结束
                             json = "{\n" +
@@ -172,7 +173,12 @@ public class IatModelZhMain extends WebSocketListener {
             folder.mkdirs();
         }
 
+        System.out.println(text);
+
         JsonParse jsonParse = gson.fromJson(text, JsonParse.class);
+
+        //System.out.println(jsonParse.header.code);
+
         if (jsonParse != null) {
             if (jsonParse.header.code != 0) {
                 System.out.println("code=>" + jsonParse.header.code + " error=>" + jsonParse.header.message + " sid=" + jsonParse.header.sid);
@@ -291,6 +297,10 @@ public class IatModelZhMain extends WebSocketListener {
         this.inputStream = new ByteArrayInputStream(pcmStream.toByteArray());
 
         WebSocket webSocket = client.newWebSocket(request, new IatModelZhMain());
+    }
+
+    public void nextVoice(ByteArrayOutputStream pcmStream){
+        this.inputStream = new ByteArrayInputStream(pcmStream.toByteArray());
     }
 
     public String getAuthUrl(String hostUrl, String apiKey, String apiSecret) throws Exception {

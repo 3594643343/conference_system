@@ -25,8 +25,8 @@ public class UserInMeetingServiceImpl extends ServiceImpl<UserInMeetingMapper, U
     private UserInMeetingMapper userInMeetingMapper;
 
     @Override
-    public void saveAllUserInMeeting(Long meetingId, List<Long> userIds) {
-        for (Long userId : userIds) {
+    public void saveAllUserInMeeting(Long meetingId, List<Integer> userIds) {
+        for (Integer userId : userIds) {
             UserInMeeting uim = new UserInMeeting();
             uim.setMeetingId(meetingId);
             uim.setUserId(userId);
@@ -35,11 +35,11 @@ public class UserInMeetingServiceImpl extends ServiceImpl<UserInMeetingMapper, U
     }
 
     @Override
-    public List<Long> getUsersIdsFromMeetingId(Long meetingId) {
+    public List<Integer> getUsersIdsFromMeetingId(Long meetingId) {
         List<UserInMeeting> list = userInMeetingMapper.selectList(
                 new QueryWrapper<UserInMeeting>().eq("meeting_id", meetingId)
         );
-        List<Long> userIds = new ArrayList<>();
+        List<Integer> userIds = new ArrayList<>();
         for(UserInMeeting uim : list){
             userIds.add(uim.getUserId());
         }

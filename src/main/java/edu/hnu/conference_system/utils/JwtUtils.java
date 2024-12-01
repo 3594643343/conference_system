@@ -75,7 +75,7 @@ public class JwtUtils {
         if(!verify(token)) return null;
         // 解析数据
         JWT jwt = JWT.of(token);
-        Long id = Long.valueOf((jwt.getPayload("userId").toString()));
+        Integer id = Integer.valueOf((jwt.getPayload("userId").toString()));
         String account = jwt.getPayload("userName").toString();
         // 返回用户信息
         return new UserDto(id, account);

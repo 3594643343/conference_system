@@ -28,7 +28,7 @@ public class UserRecord implements Serializable {
     /**
      * 
      */
-    private Long userId;
+    private Integer userId;
 
     /**
      * 

@@ -12,7 +12,7 @@ import java.util.List;
 */
 public interface UserInMeetingService extends IService<UserInMeeting> {
 
-    void saveAllUserInMeeting(Long meetingId, List<Long> userIds);
+    void saveAllUserInMeeting(Long meetingId, List<Integer> userIds);
 
-    List<Long> getUsersIdsFromMeetingId(Long meetingId);
+    List<Integer> getUsersIdsFromMeetingId(Long meetingId);
 }

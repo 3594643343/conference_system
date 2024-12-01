@@ -221,10 +221,10 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public List<Long> getOnMeetingUserId(Long meetingId) {
+    public List<Integer> getOnMeetingUserId(Long meetingId) {
         for (Room room:roomList){
             if(Objects.equals(room.getMeetingId(), meetingId)){
-                List<Long> users = new ArrayList<>();
+                List<Integer> users = new ArrayList<>();
                 for(User user:room.getMembersOn()){
                     users.add(user.getId());
                 }
@@ -277,7 +277,7 @@ public class RoomServiceImpl implements RoomService {
             if(room.getMeetingNumber().equals(meetingNumber)) {
                 room.getMembersOn().add(user);
                 //所有用户列表中没有该用户则加入该用户
-                if(!room.getMembersAll().contains(user)) {
+                if(!room.getMembersAll().contains(user.getId())) {
                     room.getMembersAll().add(user.getId());
                 }
                 break;
@@ -347,7 +347,7 @@ public class RoomServiceImpl implements RoomService {
 
 
                 //为每一个与会者插入记录索引表
-                for(Long userId : room.getMembersAll()) {
+                for(Integer userId : room.getMembersAll()) {
                     userRecordService.insertRecord(userId,meetingId);
                 }
 
@@ -374,7 +374,7 @@ public class RoomServiceImpl implements RoomService {
      * 会议结束时调用
      */
     private void saveAllUserInMeeting(Room room) {
-        List<Long> userIds = new ArrayList<>(room.getMembersAll());
+        List<Integer> userIds = new ArrayList<>(room.getMembersAll());
         userInMeetingService.saveAllUserInMeeting(room.getMeetingId(), userIds);
     }
 

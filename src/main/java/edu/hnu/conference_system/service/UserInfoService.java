@@ -7,14 +7,11 @@ import edu.hnu.conference_system.dto.PasswordChangeDto;
 import edu.hnu.conference_system.dto.UserInfoDto;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.vo.EmailLoginVo;
-import edu.hnu.conference_system.vo.LoginVo;
 import edu.hnu.conference_system.vo.UserInfoVo;
 //import edu.hnu.conference_system.vo.UserBriefVo;
-import edu.hnu.conference_system.domain.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
 * @author lenovo
@@ -41,6 +38,8 @@ public interface UserInfoService extends IService<UserInfo> {
     Result resetPassword(Integer userId);
 
     Long getMeetingIdByUserId(Integer userId);
+
+    String getUserAvatar(Integer userId);
 
 
     //Result getUserInfo(Long );

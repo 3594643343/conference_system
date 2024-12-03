@@ -49,6 +49,10 @@ public class MeetingAudioServiceImpl extends ServiceImpl<MeetingAudioMapper, Mee
         MeetingAudio meetingAudio = meetingAudioMapper.selectOne(
                 new QueryWrapper<MeetingAudio>().eq("meeting_id", meetingId)
         );
+        if(meetingAudio == null){
+            throw new RuntimeException("查询数据库失败!");
+        }
+        System.out.println(meetingAudio.getMeetingAudioId());
         return meetingAudio.getMeetingAudioId();
     }
 }

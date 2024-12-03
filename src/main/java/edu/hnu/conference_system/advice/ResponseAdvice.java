@@ -15,11 +15,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 /*
 发给客户端的响应要求是Result格式的, 如果返回的不是Result格式,会被该类拦截并包装成Result格式
  */
-
-
-
-
-
 @Slf4j
 @RestControllerAdvice("edu.hnu.conference_system.controller") // 指定拦截请求的范围，防止拦截swagger网页
 // @RestControllerAdvice(assignableTypes = BaseController.class)

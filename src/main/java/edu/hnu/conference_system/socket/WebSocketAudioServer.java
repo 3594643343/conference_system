@@ -109,13 +109,13 @@ public class WebSocketAudioServer {
     }
 
     @OnMessage
-    public void onMessage(@PathParam(value = "userId") Long userId, String message) throws IOException {
+    public void onMessage(@PathParam(value = "userId") Integer userId, String message) throws IOException {
         //字符串分发
         broadcast2All(message);
     }
 
     @OnMessage(maxMessageSize = 5242880)
-    public void onMessage(@PathParam(value = "userId") Long userId, ByteBuffer message) throws Exception {
+    public void onMessage(@PathParam(value = "userId") Integer userId, ByteBuffer message) throws Exception {
         //音频分发
         broadcast2All(message);
         //System.out.println(message.array().length);

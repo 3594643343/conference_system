@@ -1,5 +1,6 @@
 package edu.hnu.conference_system.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -17,7 +18,7 @@ public class ChatGroup implements Serializable {
     /**
      * 
      */
-    @TableId
+    @TableId(value = "group_id",type = IdType.AUTO)
     private Integer groupId;
 
     /**

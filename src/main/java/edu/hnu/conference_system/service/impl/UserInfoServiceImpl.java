@@ -144,10 +144,17 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         if (userPassword.length() < 6 || checkPassword.length() < 6) {//密码长度不可小于6
             return Result.error("密码长度不可小于6!");
         }
-        //账号不可重复（同一账号不可重复注册）
+        //邮箱不可重复（同一邮箱不可重复注册）
         QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_name", userName);
+        queryWrapper.eq("user_email", userEmail);
         long count = userMapper.selectCount(queryWrapper);
+        if (count > 0) {
+            return Result.error("邮箱已被使用!");
+        }
+        //账号不可重复（同一账号不可重复注册）
+        queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_name", userName);
+        count = userMapper.selectCount(queryWrapper);
         if (count > 0) {
             return Result.error("用户名已被使用!");
         }
@@ -314,6 +321,12 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
             }
         }
         return (long) -1;
+    }
+
+    @Override
+    public String getUserAvatar(Integer userId) {
+        UserInfo u = userMapper.selectById(userId);
+        return Base64Utils.encode(u.getAvatarPath());
     }
 
 

@@ -40,5 +40,5 @@ public class BookMeetingDto {
     /**
      *预置词
      */
-    private String presettingWord;
+    //private String presettingWord;
 }

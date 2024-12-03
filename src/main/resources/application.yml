@@ -19,6 +19,7 @@ server:
   port: 8079
 files-upload-url:
   avatar: D://code/files_upload/avatar
+  group-avatar: D://code/files_upload/group_avatar
   file: D://code/files_upload/file
   default-avatar: D://code/files_upload/defaultAvatar.jpg
   audios: D://code/files_upload/Audios

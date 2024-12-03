@@ -11,5 +11,11 @@ import edu.hnu.conference_system.result.Result;
 */
 public interface UserContactService extends IService<UserContact> {
 
-    Result addFriend(Long friendid);
+    Result addFriend(Integer friendid);
+
+    Result searchById(Integer friendId);
+
+    Result deleteFriend(Integer friendId);
+
+    Boolean beforeSendCheck(Integer userId, Integer toWho);
 }

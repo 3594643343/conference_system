@@ -317,7 +317,7 @@ public class RoomServiceImpl implements RoomService {
             if(room.getMeetingNumber().equals(meetingNumber)) {
 
                 //开启一个线程去执行录音叠加,完成后将音频记录到数据库
-                Thread t1 = new Thread(() -> {
+                //Thread t1 = new Thread(() -> {
                     //录音叠加
                     mergeAudios2One(meetingId);
                     //叠加完成后将音频地址记录到数据库
@@ -326,8 +326,8 @@ public class RoomServiceImpl implements RoomService {
                     Long audioId = meetingAudioService.getAudioIdByMeetingId(meetingId);
                     //将音频id插入到会议记录表里
                     meeting.setMeetingAudioId(audioId);
-                });
-                t1.start();
+                //});
+                //t1.start();
 
                 //记录参会者
                 saveAllUserInMeeting(room);

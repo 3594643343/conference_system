@@ -13,8 +13,6 @@ import static xunfei_api.IatModelZhMain.*;
 
 @MapperScan("edu.hnu.conference_system.mapper")
 @SpringBootApplication
-
-
 public class ConferenceSystemApplication {
 	//private static IatModelZhMain voiceToText;
 
@@ -22,8 +20,6 @@ public class ConferenceSystemApplication {
 		String IP = InetAddress.getLocalHost().getHostAddress();
 		System.out.println("ip为:"+IP);
 		SpringApplication.run(ConferenceSystemApplication.class, args);
-		// 调用语音转写功能
-		//voiceToText.VoiceToText(args);
 	}
 
 }

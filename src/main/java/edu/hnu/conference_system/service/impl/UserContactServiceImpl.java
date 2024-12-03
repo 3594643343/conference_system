@@ -14,6 +14,7 @@ import edu.hnu.conference_system.utils.Base64Utils;
 import edu.hnu.conference_system.vo.UserFriendVo;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 /**
@@ -34,13 +35,29 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
     private WebSocketChatServer webSocketChatServer;
 
     @Autowired
+    @Lazy
     public void setWebSocketChatServer(WebSocketChatServer webSocketChatServer) {
         this.webSocketChatServer = webSocketChatServer;
     }
 
     @Override
     public Result addFriend(Integer friendid) {
-        return null;
+        if(userInfoService.isNeedCheck(friendid)){
+
+        }
+        else{
+            makeFriendContact(UserHolder.getUserId(),friendid);
+
+        }
+        return Result.success("已添加 "+friendid);
+    }
+
+    private void makeFriendContact(Integer userId, Integer friendid) {
+        UserContact userContact = new UserContact();
+        userContact.setUserId(userId);
+        userContact.setUserfriendId(friendid);
+        userContact.setIsFriend(1);
+        userContactMapper.insertOrUpdate(userContact);
     }
 
     @Override
@@ -62,10 +79,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         userFriendVo.setFriendSignature(userInfo.getUserSignature());
         userFriendVo.setFriendAvatar(Base64Utils.encode(userInfo.getAvatarPath()));
 
-        if (userContact != null) {
-            userFriendVo.setIsFriend(true);
-        }
-        else userFriendVo.setIsFriend(false);
+        userFriendVo.setIsFriend(userContact != null);
 
         return Result.success(userFriendVo);
     }

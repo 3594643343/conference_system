@@ -16,4 +16,6 @@ public class ChangeGroupDto {
     private String groupName;
 
     private MultipartFile groupAvatar;
+
+    private Integer needCheck;
 }

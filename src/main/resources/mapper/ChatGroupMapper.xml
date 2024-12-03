@@ -10,10 +10,11 @@
             <result property="groupName" column="group_name" jdbcType="CHAR"/>
             <result property="groupCreateTime" column="group_create_time" jdbcType="TIMESTAMP"/>
             <result property="groupAvatarPath" column="group_avatar_path" jdbcType="VARCHAR"/>
+            <result property="needCheck" column="need_check" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         group_id,group_creator_id,group_name,
-        group_create_time,group_avatar_path
+        group_create_time,group_avatar_path,need_check
     </sql>
 </mapper>

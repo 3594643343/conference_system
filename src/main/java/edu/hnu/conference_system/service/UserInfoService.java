@@ -41,6 +41,8 @@ public interface UserInfoService extends IService<UserInfo> {
 
     String getUserAvatar(Integer userId);
 
+    boolean isNeedCheck(Integer friendid);
+
 
     //Result getUserInfo(Long );
 

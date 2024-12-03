@@ -13,11 +13,12 @@
             <result property="userSignature" column="user_signature" jdbcType="VARCHAR"/>
             <result property="isAdmin" column="is_admin" jdbcType="BIT"/>
             <result property="avatarPath" column="avatar_path" jdbcType="VARCHAR"/>
+            <result property="needCheck" column="need_check" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         user_id,user_name,user_password,
         user_email,user_reg_time,user_signature,
-        is_admin,avatar_path
+        is_admin,avatar_path,need_check
     </sql>
 </mapper>

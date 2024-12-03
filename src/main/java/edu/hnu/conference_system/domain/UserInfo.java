@@ -56,6 +56,10 @@ public class UserInfo implements Serializable {
      */
     private String avatarPath;
 
+    /**
+     *
+     */
+    private Integer needCheck;
 
 
     @TableField(exist = false)

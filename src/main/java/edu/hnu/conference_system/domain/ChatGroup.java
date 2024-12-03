@@ -4,9 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import lombok.Data;
 
 /**
  * 
@@ -18,7 +19,7 @@ public class ChatGroup implements Serializable {
     /**
      * 
      */
-    @TableId(value = "group_id",type = IdType.AUTO)
+    @TableId(type = IdType.AUTO)
     private Integer groupId;
 
     /**
@@ -41,6 +42,11 @@ public class ChatGroup implements Serializable {
      */
     private String groupAvatarPath;
 
+    /**
+     * 
+     */
+    private Integer needCheck;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
@@ -60,7 +66,8 @@ public class ChatGroup implements Serializable {
             && (this.getGroupCreatorId() == null ? other.getGroupCreatorId() == null : this.getGroupCreatorId().equals(other.getGroupCreatorId()))
             && (this.getGroupName() == null ? other.getGroupName() == null : this.getGroupName().equals(other.getGroupName()))
             && (this.getGroupCreateTime() == null ? other.getGroupCreateTime() == null : this.getGroupCreateTime().equals(other.getGroupCreateTime()))
-            && (this.getGroupAvatarPath() == null ? other.getGroupAvatarPath() == null : this.getGroupAvatarPath().equals(other.getGroupAvatarPath()));
+            && (this.getGroupAvatarPath() == null ? other.getGroupAvatarPath() == null : this.getGroupAvatarPath().equals(other.getGroupAvatarPath()))
+            && (this.getNeedCheck() == null ? other.getNeedCheck() == null : this.getNeedCheck().equals(other.getNeedCheck()));
     }
 
     @Override
@@ -72,6 +79,7 @@ public class ChatGroup implements Serializable {
         result = prime * result + ((getGroupName() == null) ? 0 : getGroupName().hashCode());
         result = prime * result + ((getGroupCreateTime() == null) ? 0 : getGroupCreateTime().hashCode());
         result = prime * result + ((getGroupAvatarPath() == null) ? 0 : getGroupAvatarPath().hashCode());
+        result = prime * result + ((getNeedCheck() == null) ? 0 : getNeedCheck().hashCode());
         return result;
     }
 
@@ -86,6 +94,7 @@ public class ChatGroup implements Serializable {
         sb.append(", groupName=").append(groupName);
         sb.append(", groupCreateTime=").append(groupCreateTime);
         sb.append(", groupAvatarPath=").append(groupAvatarPath);
+        sb.append(", needCheck=").append(needCheck);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

@@ -50,6 +50,7 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         chatGroup.setGroupCreatorId(UserHolder.getUserId());
         chatGroup.setGroupCreateTime(LocalDateTime.now());
         chatGroup.setGroupName(groupDto.getGroupName());
+        chatGroup.setNeedCheck(groupDto.getNeedCheck());
         String thisAvatarPath = avatarPath +"/"+ UserHolder.getUserId()+"_"+groupDto.getGroupName()+".jpg";
         File file = new File(thisAvatarPath);
         try{
@@ -78,6 +79,10 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
                 return Result.error("更新群信息失败: "+e.getMessage());
             }
         }
+        if(groupDto.getNeedCheck() != null) {
+            updateWrapper.set("need_check", groupDto.getNeedCheck());
+        }
+        chatGroupMapper.update(updateWrapper);
         return Result.success("更新成功!");
 
     }

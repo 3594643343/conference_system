@@ -329,6 +329,12 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         return Base64Utils.encode(u.getAvatarPath());
     }
 
+    @Override
+    public boolean isNeedCheck(Integer friendid) {
+        UserInfo userInfo = userMapper.selectById(friendid);
+        return userInfo.getNeedCheck() == 1L;
+    }
+
 
 }
 

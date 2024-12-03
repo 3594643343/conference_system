@@ -10,7 +10,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GroupInfoVo {
 
+    private Integer groupId;
+
     private String groupName;
+
+    private Integer creatorId;
 
     private String creatorName;
 

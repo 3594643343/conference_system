@@ -6,6 +6,7 @@ import edu.hnu.conference_system.dto.ChangeGroupDto;
 import edu.hnu.conference_system.dto.CreateGroupDto;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.vo.GroupInfoVo;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
 * @author lenovo
@@ -25,4 +26,5 @@ public interface ChatGroupService extends IService<ChatGroup> {
     void deleteGroup(Integer groupId);
 
     Integer getGroupCreatorId(Integer groupId);
+
 }

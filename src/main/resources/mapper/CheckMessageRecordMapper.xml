@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.hnu.conference_system.mapper.CheckMessageRecordMapper">
+
+    <resultMap id="BaseResultMap" type="edu.hnu.conference_system.domain.CheckMessageRecord">
+            <id property="recordId" column="record_id" jdbcType="INTEGER"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="isSender" column="is_sender" jdbcType="TINYINT"/>
+            <result property="result" column="result" jdbcType="INTEGER"/>
+            <result property="groupId" column="group_id" jdbcType="INTEGER"/>
+            <result property="anotherId" column="another_id" jdbcType="INTEGER"/>
+            <result property="message" column="message" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        record_id,user_id,is_sender,
+        result,group_id,another_id,
+        message
+    </sql>
+</mapper>

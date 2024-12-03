@@ -2,6 +2,7 @@ package edu.hnu.conference_system.service;
 
 import edu.hnu.conference_system.domain.FriendChatRecord;
 import com.baomidou.mybatisplus.extension.service.IService;
+import edu.hnu.conference_system.result.Result;
 
 /**
 * @author lenovo
@@ -10,4 +11,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface FriendChatRecordService extends IService<FriendChatRecord> {
 
+    Result getRecord(Integer userId, Integer friendId);
+
+    void insertRecord(Integer senderId, Integer friendId, String content, String time);
 }

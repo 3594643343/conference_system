@@ -1,21 +1,28 @@
 package edu.hnu.conference_system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.hnu.conference_system.domain.UserContact;
 import edu.hnu.conference_system.domain.UserInfo;
 import edu.hnu.conference_system.holder.UserHolder;
+import edu.hnu.conference_system.mapper.UserInfoMapper;
 import edu.hnu.conference_system.result.Result;
+import edu.hnu.conference_system.service.CheckMessageRecordService;
 import edu.hnu.conference_system.service.UserContactService;
 import edu.hnu.conference_system.mapper.UserContactMapper;
 import edu.hnu.conference_system.service.UserInfoService;
 import edu.hnu.conference_system.socket.WebSocketChatServer;
 import edu.hnu.conference_system.utils.Base64Utils;
 import edu.hnu.conference_system.vo.UserFriendVo;
+import edu.hnu.conference_system.vo.UserInfoVo;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
 * @author lenovo
@@ -32,6 +39,9 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
     @Resource
     private UserInfoService userInfoService;
 
+    @Resource
+    private CheckMessageRecordService checkMessageRecordService;
+
     private WebSocketChatServer webSocketChatServer;
 
     @Autowired
@@ -41,23 +51,43 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
     }
 
     @Override
-    public Result addFriend(Integer friendid) {
-        if(userInfoService.isNeedCheck(friendid)){
-
+    public Result addFriend(Integer friendId,String checkWords) {
+        if(userInfoService.isNeedCheck(friendId)){
+            webSocketChatServer.sendAddFriendCheckMessage(UserHolder.getUserId(),friendId,checkWords);
+            return Result.success("已发送好友验证");
         }
         else{
-            makeFriendContact(UserHolder.getUserId(),friendid);
-
+            makeFriendContact(UserHolder.getUserId(),friendId);
+            return Result.success("已添加 "+friendId);
         }
-        return Result.success("已添加 "+friendid);
+
     }
 
-    private void makeFriendContact(Integer userId, Integer friendid) {
-        UserContact userContact = new UserContact();
-        userContact.setUserId(userId);
-        userContact.setUserfriendId(friendid);
-        userContact.setIsFriend(1);
-        userContactMapper.insertOrUpdate(userContact);
+    private void makeFriendContact(Integer userId, Integer friendId) {
+        UserContact uc = userContactMapper.selectOne(new QueryWrapper<UserContact>()
+                .eq("user_id", userId).eq("userfriend_id", friendId));
+        if(uc == null){
+            UserContact userContact = new UserContact();
+            userContact.setUserId(userId);
+            userContact.setUserfriendId(friendId);
+            userContact.setIsFriend(1);
+            userContactMapper.insert(userContact);
+            userContact.setUserId(friendId);
+            userContact.setUserfriendId(userId);
+            userContact.setIsFriend(1);
+            userContactMapper.insert(userContact);
+        }
+        else if(uc.getIsFriend() == 0){
+            UserContact ucn = new UserContact();
+            ucn.setIsFriend(1);
+            userContactMapper.update(ucn, new UpdateWrapper<UserContact>()
+                    .eq("user_id", userId).eq("userfriend_id", friendId)
+            );
+            userContactMapper.update(ucn, new UpdateWrapper<UserContact>()
+                    .eq("user_id", friendId).eq("userfriend_id", userId)
+            );
+        }
+
     }
 
     @Override
@@ -104,6 +134,49 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 new QueryWrapper<UserContact>().eq("user_id", userId).eq("userfriend_id", toWho)
         );
         return userContact != null && userContact.getIsFriend() != 0;
+    }
+
+    @Override
+    public Result dealCheck(Integer recordId,Integer frienId, Integer check) {
+        if(check == 0){
+
+            checkMessageRecordService.refuseFriendCheck(recordId);
+            return Result.success("已拒绝"+frienId+"添加好友");
+        }
+        else{
+
+            checkMessageRecordService.passFriendCheck(recordId);
+            makeFriendContact(frienId,UserHolder.getUserId());
+            return getOnesAllFriend(UserHolder.getUserId());
+        }
+    }
+
+    @Override
+    public Result getOnesAllFriend(Integer userId) {
+        List<UserContact> contacts = userContactMapper.selectList(
+                new QueryWrapper<UserContact>().eq("user_id", userId)
+        );
+        List<Integer> friendIds = new ArrayList<>();
+        for(UserContact uc : contacts){
+            if(uc.getIsFriend() == 1){
+                friendIds.add(uc.getUserId());
+            }
+        }
+        return Result.success(friendIds);
+    }
+
+    @Override
+    public Result getAllFriendInfo(Integer userId) {
+        List<UserContact> contacts = userContactMapper.selectList(
+                new QueryWrapper<UserContact>().eq("user_id", userId)
+        );
+        List<UserInfoVo> friendInfos = new ArrayList<>();
+        for(UserContact uc : contacts){
+            if(uc.getIsFriend() == 1){
+                friendInfos.add(userInfoService.getUserInfo(uc.getUserId()));
+            }
+        }
+        return Result.success(friendInfos);
     }
 }
 

@@ -15,7 +15,7 @@ public interface UserAndGroupService extends IService<UserAndGroup> {
 
     Result searchGroup(Integer groupId);
 
-    Result addGroup(Integer groupId);
+    Result addGroup(Integer groupId,String checkWords);
 
     Result getMembers(Integer groupId);
 
@@ -26,4 +26,12 @@ public interface UserAndGroupService extends IService<UserAndGroup> {
     List<Integer> getMembersId(Integer toWho);
 
     boolean beforeSendCheck(Integer userId, Integer groupId);
+
+    Result getOnesAllGroup(Integer userId);
+
+    Result dealCheck(Integer recordId,Integer userId, Integer groupId, Integer check);
+
+    void directJoinGroup(Integer groupId, Integer userId);
+
+    Result getIsIn(Integer userId, Integer groupId);
 }

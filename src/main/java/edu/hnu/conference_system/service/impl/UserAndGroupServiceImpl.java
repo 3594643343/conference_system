@@ -5,16 +5,21 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.hnu.conference_system.domain.ChatGroup;
 import edu.hnu.conference_system.domain.UserAndGroup;
+import edu.hnu.conference_system.domain.UserContact;
 import edu.hnu.conference_system.holder.UserHolder;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.ChatGroupService;
+import edu.hnu.conference_system.service.CheckMessageRecordService;
 import edu.hnu.conference_system.service.UserAndGroupService;
 import edu.hnu.conference_system.mapper.UserAndGroupMapper;
 import edu.hnu.conference_system.service.UserInfoService;
+import edu.hnu.conference_system.socket.WebSocketChatServer;
 import edu.hnu.conference_system.utils.Base64Utils;
 import edu.hnu.conference_system.vo.GroupInfoVo;
 import edu.hnu.conference_system.vo.GroupMemberVo;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -38,6 +43,17 @@ public class UserAndGroupServiceImpl extends ServiceImpl<UserAndGroupMapper, Use
     @Resource
     private UserInfoService userInfoService;
 
+    @Resource
+    private CheckMessageRecordService checkMessageRecordService;
+
+    private WebSocketChatServer webSocketChatServer;
+
+    @Autowired
+    @Lazy
+    public void setWebSocketChatServer(WebSocketChatServer webSocketChatServer) {
+        this.webSocketChatServer = webSocketChatServer;
+    }
+
     @Override
     public Result searchGroup(Integer groupId) {
         ChatGroup chatGroup = chatGroupService.getById(groupId);
@@ -59,8 +75,35 @@ public class UserAndGroupServiceImpl extends ServiceImpl<UserAndGroupMapper, Use
     }
 
     @Override
-    public Result addGroup(Integer groupId) {
-        return null;
+    public Result addGroup(Integer groupId,String checkWords) {
+        ChatGroup chatGroup = chatGroupService.getById(groupId);
+        if(chatGroup.getNeedCheck() == 0){
+            makeGroupContact(groupId,UserHolder.getUserId());
+            return Result.success("已加入群聊: "+groupId);
+        }
+        else{
+            webSocketChatServer.sendAddGroupCheckMessage(UserHolder.getUserId(),groupId,checkWords);
+            return Result.success("已发送群聊验证");
+        }
+    }
+
+    private void makeGroupContact(Integer groupId, Integer userId) {
+        UserAndGroup ug = userAndGroupMapper.selectOne(new QueryWrapper<UserAndGroup>()
+                .eq("user_id", userId).eq("group_id", groupId));
+        if(ug == null){
+            UserAndGroup userAndGroup = new UserAndGroup();
+            userAndGroup.setUserId(userId);
+            userAndGroup.setGroupId(groupId);
+            userAndGroup.setIsIn(1);
+            userAndGroupMapper.insert(userAndGroup);
+        }
+        else if(ug.getIsIn() == 0){
+            UserAndGroup ugn = new UserAndGroup();
+            ugn.setIsIn(1);
+            userAndGroupMapper.update(ugn, new UpdateWrapper<UserAndGroup>()
+                    .eq("user_id", userId).eq("group_id", groupId)
+            );
+        }
     }
 
     @Override
@@ -121,6 +164,52 @@ public class UserAndGroupServiceImpl extends ServiceImpl<UserAndGroupMapper, Use
         );
         return userAndGroup != null && userAndGroup.getIsIn() != 0;
     }
+
+    @Override
+    public Result getOnesAllGroup(Integer userId) {
+        List<UserAndGroup> groups = userAndGroupMapper.selectList(
+                new QueryWrapper<UserAndGroup>().eq("user_id", userId)
+        );
+        List<Integer> ids = new ArrayList<>();
+        for (UserAndGroup userAndGroup : groups) {
+            if(userAndGroup.getIsIn() == 1){
+                ids.add(userAndGroup.getGroupId());
+            }
+        }
+        return Result.success(ids);
+    }
+
+    @Override
+    public Result dealCheck(Integer recordId,Integer userId, Integer groupId, Integer check) {
+        if(check == 0){
+
+            checkMessageRecordService.refuseGroupCheck(recordId);
+            return Result.success("已拒绝申请");
+        }
+        else{
+            checkMessageRecordService.passGroupCheck(recordId);
+            makeGroupContact(userId, groupId);
+            return Result.success("已同意申请");
+        }
+    }
+
+    @Override
+    public void directJoinGroup(Integer groupId, Integer userId) {
+        UserAndGroup userAndGroup =new UserAndGroup();
+        userAndGroup.setGroupId(groupId);
+        userAndGroup.setUserId(userId);
+        userAndGroup.setIsIn(1);
+        userAndGroupMapper.insert(userAndGroup);
+    }
+
+    @Override
+    public Result getIsIn(Integer userId, Integer groupId) {
+        UserAndGroup userAndGroup = userAndGroupMapper.selectOne(
+                new QueryWrapper<UserAndGroup>().eq("user_id",userId).eq("group_id",groupId)
+        );
+        return Result.success(userAndGroup.getIsIn() == 1);
+    }
+
 }
 
 

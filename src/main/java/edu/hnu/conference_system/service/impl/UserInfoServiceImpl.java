@@ -335,6 +335,32 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         return userInfo.getNeedCheck() == 1L;
     }
 
+    @Override
+    public Result getAllUsers() {
+        List<UserInfoVo> users = new ArrayList<>();
+        List<UserInfo> userInfos = userMapper.selectList(null);
+        for(UserInfo userInfo:userInfos){
+            UserInfoVo userInfoVo = new UserInfoVo();
+            userInfoVo.setId(userInfo.getUserId());
+            userInfoVo.setUsername(userInfo.getUserName());
+            userInfoVo.setSignature(userInfo.getUserSignature());
+            userInfoVo.setAvatar(Base64Utils.encode(userInfo.getAvatarPath()));
+            users.add(userInfoVo);
+        }
+        return Result.success(users);
+    }
+
+    @Override
+    public UserInfoVo getUserInfo(Integer friendId) {
+        UserInfo userInfo = userMapper.selectById(friendId);
+        UserInfoVo userInfoVo = new UserInfoVo();
+        userInfoVo.setId(userInfo.getUserId());
+        userInfoVo.setUsername(userInfo.getUserName());
+        userInfoVo.setSignature(userInfo.getUserSignature());
+        userInfoVo.setAvatar(Base64Utils.encode(userInfo.getAvatarPath()));
+        return userInfoVo;
+    }
+
 
 }
 

@@ -10,6 +10,7 @@ import edu.hnu.conference_system.holder.UserHolder;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.ChatGroupService;
 import edu.hnu.conference_system.mapper.ChatGroupMapper;
+import edu.hnu.conference_system.service.UserAndGroupService;
 import edu.hnu.conference_system.service.UserInfoService;
 import edu.hnu.conference_system.utils.Base64Utils;
 import edu.hnu.conference_system.vo.CreateGroupVo;
@@ -17,7 +18,9 @@ import edu.hnu.conference_system.vo.GroupInfoVo;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +47,14 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
     @Resource
     private UserInfoService userInfoService;
 
+    private UserAndGroupService userAndGroupService;
+
+    @Autowired
+    @Lazy
+    private void setUserAndGroupService(UserAndGroupService userAndGroupService) {
+        this.userAndGroupService = userAndGroupService;
+    }
+
     @Override
     public Result createGroup(CreateGroupDto groupDto) {
         ChatGroup chatGroup = new ChatGroup();
@@ -61,6 +72,7 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         chatGroup.setGroupAvatarPath(thisAvatarPath);
         chatGroupMapper.insert(chatGroup);
         Integer id = chatGroup.getGroupId();
+        userAndGroupService.directJoinGroup(id,UserHolder.getUserId());
         return Result.success(new CreateGroupVo(id));
     }
 
@@ -71,10 +83,10 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         if(groupDto.getGroupName() != null) {
             updateWrapper.set("group_name", groupDto.getGroupName());
         }
-        if(groupDto.getGroupAvatar() != null) {
+        if(groupDto.getAvatar() != null) {
             try {
                 File oldAvatar = new File(findGroupAvatarPathById(groupDto.getGroupId()));
-                groupDto.getGroupAvatar().transferTo(oldAvatar);
+                groupDto.getAvatar().transferTo(oldAvatar);
             }catch (IOException e) {
                 return Result.error("更新群信息失败: "+e.getMessage());
             }
@@ -87,6 +99,7 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
 
     }
 
+
     @Override
     public Result getGroupInfo(Integer groupId) {
         ChatGroup chatGroup = chatGroupMapper.selectById(groupId);
@@ -94,10 +107,12 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
             return Result.error("未找到群聊!");
         }
         GroupInfoVo groupInfoVo = new GroupInfoVo();
+        groupInfoVo.setGroupId(chatGroup.getGroupId());
+        groupInfoVo.setCreatorId(chatGroup.getGroupCreatorId());
         groupInfoVo.setGroupName(chatGroup.getGroupName());
         groupInfoVo.setCreatorName(userInfoService.getNameById(chatGroup.getGroupCreatorId()));
         groupInfoVo.setGroupAvatar(Base64Utils.encode(chatGroup.getGroupAvatarPath()));
-        return Result.success(chatGroup.getGroupName());
+        return Result.success(groupInfoVo);
 
     }
 
@@ -105,6 +120,8 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
     public GroupInfoVo buildGroupInfo(Integer groupId) {
         ChatGroup chatGroup = chatGroupMapper.selectById(groupId);
         GroupInfoVo groupInfoVo = new GroupInfoVo();
+        groupInfoVo.setGroupId(chatGroup.getGroupId());
+        groupInfoVo.setCreatorId(chatGroup.getGroupCreatorId());
         groupInfoVo.setGroupName(chatGroup.getGroupName());
         groupInfoVo.setCreatorName(userInfoService.getNameById(chatGroup.getGroupCreatorId()));
         groupInfoVo.setGroupAvatar(Base64Utils.encode(chatGroup.getGroupAvatarPath()));
@@ -121,7 +138,6 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         ChatGroup chatGroup = chatGroupMapper.selectById(groupId);
         return chatGroup.getGroupCreatorId();
     }
-
 
     private String findGroupAvatarPathById(Integer groupId) {
         ChatGroup chatGroup = chatGroupMapper.selectById(groupId);

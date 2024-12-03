@@ -2,6 +2,7 @@ package edu.hnu.conference_system.service;
 
 import edu.hnu.conference_system.domain.GroupChatRecord;
 import com.baomidou.mybatisplus.extension.service.IService;
+import edu.hnu.conference_system.result.Result;
 
 /**
 * @author lenovo
@@ -10,4 +11,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface GroupChatRecordService extends IService<GroupChatRecord> {
 
+    Result getRecord(Integer groupId);
+
+    void insertRecord(Integer groupId, Integer speakerId, String content, String time);
 }

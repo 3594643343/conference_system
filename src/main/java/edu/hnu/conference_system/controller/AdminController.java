@@ -29,18 +29,8 @@ public class AdminController {
 
     @GetMapping("/getall")
     @Operation(summary = "获取全部用户信息")
-    public Result getAllUsers(@RequestParam("pageNumber") Long pageNumber) {
-        Page<UserInfo> userInfoPage = new Page<>(pageNumber, 10);
-        Page<UserInfo> page = new LambdaQueryChainWrapper<>(userInfoService.getBaseMapper()).page(userInfoPage);
-        //System.out.println(page == userInfoPage);
-        List<UserInfo> userInfoList = page.getRecords();
-        List<UserInfoForAdmin> userInfoForAdminList = new ArrayList<>();
-        for (UserInfo userInfo : userInfoList) {
-            UserInfoForAdmin userInfoForAdmin = new UserInfoForAdmin();
-            BeanUtils.copyProperties(userInfo, userInfoForAdmin);
-            userInfoForAdminList.add(userInfoForAdmin);
-        }
-        return Result.success(userInfoForAdminList);
+    public Result getAllUsers() {
+        return userInfoService.getAllUsers();
     }
 
     /*@DeleteMapping("/delete")

@@ -43,6 +43,10 @@ public interface UserInfoService extends IService<UserInfo> {
 
     boolean isNeedCheck(Integer friendid);
 
+    Result getAllUsers();
+
+    UserInfoVo getUserInfo(Integer friendId);
+
 
     //Result getUserInfo(Long );
 

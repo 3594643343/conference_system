@@ -4,8 +4,7 @@ package edu.hnu.conference_system.socket;
 
 import cn.hutool.json.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.hnu.conference_system.service.UserAndGroupService;
-import edu.hnu.conference_system.service.UserContactService;
+import edu.hnu.conference_system.service.*;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -16,6 +15,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +30,7 @@ public class WebSocketChatServer {
     /**
      * 消息仓库
      */
-    private static ConcurrentHashMap<Integer, List<String>> messageBuffer = new ConcurrentHashMap<>();
+    /*private static ConcurrentHashMap<Integer, List<String>> messageBuffer = new ConcurrentHashMap<>();*/
 
     private static ConcurrentHashMap<Integer, WebSocketChatServer> onlineUsers = new ConcurrentHashMap<>();
     private static CopyOnWriteArraySet<WebSocketChatServer> webSocketSet = new CopyOnWriteArraySet<>();
@@ -39,8 +39,17 @@ public class WebSocketChatServer {
     private Session session;
     private Integer userId;
 
+    private static ChatGroupService chatGroupService;
     private static UserAndGroupService userAndGroupService;
     private static UserContactService userContactService;
+    private static FriendChatRecordService friendChatRecordService;
+    private static GroupChatRecordService groupChatRecordService;
+    private static CheckMessageRecordService checkMessageRecordService;
+
+    @Autowired
+    private void setChatGroupService(ChatGroupService chatGroupService) {
+        WebSocketChatServer.chatGroupService = chatGroupService;
+    }
 
     @Autowired
     private void setUserAndGroupService(UserAndGroupService userAndGroupService) {
@@ -52,6 +61,22 @@ public class WebSocketChatServer {
         WebSocketChatServer.userContactService = userContactService;
     }
 
+    @Autowired
+    private void setFriendChatRecordService(FriendChatRecordService friendChatRecordService) {
+        WebSocketChatServer.friendChatRecordService = friendChatRecordService;
+    }
+
+    @Autowired
+    private void setGroupChatRecordService(GroupChatRecordService groupChatRecordService) {
+        WebSocketChatServer.groupChatRecordService = groupChatRecordService;
+    }
+
+    @Autowired
+    private void setCheckMessageRecordService(CheckMessageRecordService checkMessageRecordService) {
+        WebSocketChatServer.checkMessageRecordService = checkMessageRecordService;
+    }
+
+
     @OnOpen
     public void onOpen(Session session, @PathParam("userId") Integer userId) {
         this.session = session;
@@ -60,7 +85,7 @@ public class WebSocketChatServer {
         onlineUsers.put(userId, this);
         System.out.println("用户id: "+userId+" 进入了系统!");
         //检查消息仓库中是否有属于自己的消息,如果有,发送
-        messageBufferSend(userId);
+        //messageBufferSend(userId);
     }
 
     @OnClose
@@ -97,10 +122,14 @@ public class WebSocketChatServer {
         if(isGroup.equals("1")){
             //群发
             send2group(toWho,groupSendJson(toWho,userId,time,content));
+            //记录存储
+            groupChatRecordService.insertRecord(toWho,this.userId,content,time);
         }
         else{
             //私聊
             send2one(toWho,pairSendJson(userId,time,content));
+            //记录储存
+            friendChatRecordService.insertRecord(this.userId,toWho,content,time);
         }
 
     }
@@ -116,11 +145,11 @@ public class WebSocketChatServer {
             for(WebSocketChatServer webSocketChatServer : webSocketSet){
                 if(webSocketChatServer.userId.equals(toWho)){
                     webSocketChatServer.session.getBasicRemote().sendText(sendJson);
-                    return;
+                    break;
                 }
             }
             //没找到,说明不在线,放入消息仓库
-            go2buffer(toWho,sendJson);
+            //go2buffer(toWho,sendJson);
         }
         else{
             //不是好友或删除了好友
@@ -158,52 +187,68 @@ public class WebSocketChatServer {
             }
             else{
                 //不在线,存入仓库
-                go2buffer(groupMemberId,sendJson);
+                //go2buffer(groupMemberId,sendJson);
             }
 
         }
     }
 
     /**
-     * 消息存入消息仓库
-     * @param toWho
-     * @param sendJson
+     * 发送添加好友验证
      */
-    private void go2buffer(Integer toWho, String sendJson) {
-        if( !messageBuffer.containsKey(toWho)){
-            List<String> list = new ArrayList<>();
-            list.add(sendJson);
-            messageBuffer.put(toWho,list);
-        }
-        else{
-            List<String> list = messageBuffer.get(toWho);
-            list.add(sendJson);
-            messageBuffer.put(toWho,list);
-        }
-    }
+    public void sendAddFriendCheckMessage(Integer userId, Integer friendId, String checkWords) {
+        //储存记录
+        Integer recordId = checkMessageRecordService.initFriendCheck(userId,friendId,checkWords);
 
-    /**
-     * 消息仓库中消息分发, 用户登录时调用
-     * @param userId
-     */
-    private void messageBufferSend(Integer userId){
-        if(messageBuffer.isEmpty()){
-            return;
-        }
-        for(Integer key: messageBuffer.keySet()){
-            if(userId.equals(key)){
-                List<String> list = messageBuffer.get(key);
-                for(String str : list){
-                    try {
-                        onlineUsers.get(userId).session.getBasicRemote().sendText(str);
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
+        String message = checkSendJson(recordId,userId, LocalDateTime.now().toString(),checkWords);
+        for(WebSocketChatServer webSocketChatServer : webSocketSet){
+            if(webSocketChatServer.userId.equals(friendId)){
+                try {
+                    webSocketChatServer.session.getBasicRemote().sendText(message);
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
-                messageBuffer.remove(key);
                 break;
             }
         }
+
+        //没在线,转存仓库
+        //go2buffer(friendId,message);
+    }
+
+    /**
+     * 发送添加群聊验证
+     */
+    public void sendAddGroupCheckMessage(Integer userId, Integer groupId, String checkWords) {
+        Integer creatorId = chatGroupService.getGroupCreatorId(groupId);
+        //储存记录
+        Integer recordId = checkMessageRecordService.initGroupCheck(userId,groupId,creatorId,checkWords);
+
+        String message = groupCheckSendJson(recordId,userId,groupId,LocalDateTime.now().toString(),checkWords);
+        for(WebSocketChatServer webSocketChatServer : webSocketSet){
+            if(webSocketChatServer.userId.equals(creatorId)){
+                try {
+                    webSocketChatServer.session.getBasicRemote().sendText(message);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+
+        //没在线,转存仓库
+        //go2buffer(creatorId,message);
+    }
+
+    /**
+     * 构造错误消息JSON code == 0
+     * @param message
+     * @return
+     */
+    private String sendJsonError(String message) {
+        JSONObject innerJson = new JSONObject();
+        innerJson.set("message", message);
+        return buildSendJson(0,innerJson);
     }
 
     /**
@@ -239,15 +284,39 @@ public class WebSocketChatServer {
     }
 
     /**
-     * 构造错误消息JSON code == 0
-     * @param message
+     * 构造好友验证消息 code == 3
+     * @param senderId
+     * @param time
+     * @param content
      * @return
      */
-    private String sendJsonError(String message) {
+    private String checkSendJson(Integer recordId,Integer senderId, String time, String content) {
         JSONObject innerJson = new JSONObject();
-        innerJson.set("message", message);
-        return buildSendJson(0,innerJson);
+        innerJson.set("recordId", recordId);
+        innerJson.set("senderId", senderId);
+        innerJson.set("time", time);
+        innerJson.set("content", content);
+        return buildSendJson(3,innerJson);
     }
+
+    /**
+     * 构造群聊验证消息 code == 4
+     * @param senderId
+     * @param groupId
+     * @param time
+     * @param content
+     * @return
+     */
+    private String groupCheckSendJson(Integer recordId,Integer senderId,Integer groupId ,String time, String content) {
+        JSONObject innerJson = new JSONObject();
+        innerJson.set("recordId",recordId);
+        innerJson.set("senderId", senderId);
+        innerJson.set("groupId", groupId);
+        innerJson.set("time", time);
+        innerJson.set("content", content);
+        return buildSendJson(4,innerJson);
+    }
+
 
     /**
      * 构造JSON
@@ -262,4 +331,45 @@ public class WebSocketChatServer {
         return outerJson.toString();
     }
 
+    /**
+     * 消息存入消息仓库
+     * @param toWho
+     * @param sendJson
+     */
+    /*private void go2buffer(Integer toWho, String sendJson) {
+        if( !messageBuffer.containsKey(toWho)){
+            List<String> list = new ArrayList<>();
+            list.add(sendJson);
+            messageBuffer.put(toWho,list);
+        }
+        else{
+            List<String> list = messageBuffer.get(toWho);
+            list.add(sendJson);
+            messageBuffer.put(toWho,list);
+        }
+    }*/
+
+    /**
+     * 消息仓库中消息分发, 用户登录时调用
+     * @param userId
+     */
+    /*private void messageBufferSend(Integer userId){
+        if(messageBuffer.isEmpty()){
+            return;
+        }
+        for(Integer key: messageBuffer.keySet()){
+            if(userId.equals(key)){
+                List<String> list = messageBuffer.get(key);
+                for(String str : list){
+                    try {
+                        onlineUsers.get(userId).session.getBasicRemote().sendText(str);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+                messageBuffer.remove(key);
+                break;
+            }
+        }
+    }*/
 }

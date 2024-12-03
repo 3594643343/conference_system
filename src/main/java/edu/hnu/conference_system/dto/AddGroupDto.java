@@ -4,18 +4,14 @@ package edu.hnu.conference_system.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeGroupDto {
-
+public class AddGroupDto {
     private Integer groupId;
-
-    private String groupName;
-
-    private MultipartFile avatar;
-
-    private Integer needCheck;
+    /**
+     * 验证消息
+     */
+    private String checkWords;
 }

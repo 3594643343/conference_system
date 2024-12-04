@@ -177,6 +177,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         userInfo.setUserPassword(userPassword);
         userInfo.setUserRegTime(LocalDateTime.now());
         userInfo.setIsAdmin(false);
+        userInfo.setNeedCheck(0);
         userInfo.setUserSignature("尚未设置个性签名");
 
         boolean saveResult = this.save(userInfo);
@@ -248,6 +249,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         //没有重复用户名
         UserInfo newUserInfo = new UserInfo();
         newUserInfo.setUserName(userInfoDto.getUserName());
+        newUserInfo.setNeedCheck(userInfoDto.getNeedCheck());
         newUserInfo.setUserSignature(userInfoDto.getSignature());
 
 

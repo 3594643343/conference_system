@@ -16,5 +16,10 @@ public class UserInfoDto {
 
     private String signature;
 
+    /**
+     * 加好友是否需要验证 0: 不需要  1:需要
+     */
+    private Integer needCheck;
+
     //private MultipartFile avatar;
 }

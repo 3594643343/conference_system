@@ -249,9 +249,11 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         //没有重复用户名
         UserInfo newUserInfo = new UserInfo();
         newUserInfo.setUserName(userInfoDto.getUserName());
-        newUserInfo.setNeedCheck(userInfoDto.getNeedCheck());
-        newUserInfo.setUserSignature(userInfoDto.getSignature());
 
+        if(userInfoDto.getNeedCheck() != null){
+            newUserInfo.setNeedCheck(userInfoDto.getNeedCheck());
+        }
+        newUserInfo.setUserSignature(userInfoDto.getSignature());
 
         userMapper.update(newUserInfo,new UpdateWrapper<UserInfo>().eq("user_id", UserHolder.getUserId()));
         return Result.success("修改成功!");

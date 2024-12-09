@@ -37,6 +37,12 @@ public class UserInfoController {
         return userInfoService.changeUserInfo(userInfoDto);
     }
 
+    @PostMapping("/change/needCheck")
+    @Operation(summary = "修改是否需要验证")
+    public Result changeNeedCheck(@RequestParam("needCheck") Integer needCheck){
+        return userInfoService.changeNeedCheck(needCheck);
+    }
+
     @PutMapping("/change/avatar")
     @Operation(summary = "修改头像")
     public Result changeAvatar(@RequestParam("avatar") MultipartFile avatar) throws IOException {

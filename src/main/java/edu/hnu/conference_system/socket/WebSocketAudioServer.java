@@ -3,16 +3,20 @@ package edu.hnu.conference_system.socket;
 
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
+import com.alibaba.fastjson.JSON;
 import edu.hnu.conference_system.service.RoomService;
 import edu.hnu.conference_system.service.UserInfoService;
 import edu.hnu.conference_system.utils.PcmCovWavUtil;
+import edu.hnu.conference_system.vo.FileShowVo;
+import io.swagger.v3.core.util.Json;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import xunfei_api.IatModelZhMain;
+//import xunfei_api.IatModelZhMain;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -190,6 +194,10 @@ public class WebSocketAudioServer {
             //音频内存转外存
             ByteArrayOutputStream stream = byteArrayOutputStreamConcurrentHashMap.get(userId);
             if (stream != null) {
+                File file0 = new File(wavPath);
+                if (!file0.exists()){
+                    file0.createNewFile();
+                }
                 FileOutputStream fileOutputStream = new FileOutputStream(new File(wavPath),true);
                 IoUtil.copy(new ByteArrayInputStream(stream.toByteArray()), fileOutputStream);
 
@@ -231,7 +239,18 @@ public class WebSocketAudioServer {
     }
 
 
-
+    /**
+     * 广播给所有用户
+     *
+     * @param msg 消息
+     */
+    protected <T> void broadcast2All(Long meetingId,T msg) throws IOException {
+        for (WebSocketAudioServer client : webSocketSet){
+            if(Objects.equals(client.meetingId, meetingId)){
+                client.call(msg);
+            }
+        }
+    }
 
     /**
      * 广播给所有用户
@@ -273,6 +292,8 @@ public class WebSocketAudioServer {
                     remote.sendText((String) msg);
                 } else if (msg instanceof ByteBuffer) {
                     remote.sendBinary((ByteBuffer) msg);
+                }else{
+                    remote.sendObject(msg);
                 }
 
             }
@@ -282,6 +303,44 @@ public class WebSocketAudioServer {
             } catch (IOException ignored) {
             }
             onClose();
+        } catch (EncodeException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void pushFile2All(Long meetingId,FileShowVo fileShowVo) throws IOException {
+        JSON jsonObject = (JSON) JSON.toJSON(fileShowVo);
+
+        broadcast2All(meetingId,jsonObject.toString());
+    }
+
+    public void kickOneOut(Integer id){
+        for (WebSocketAudioServer client : webSocketSet){
+            if(Objects.equals(client.userId, id)){
+                try {
+                    client.session.getBasicRemote().sendText("END");
+                    client.session.close();
+                    client.onClose();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+    }
+
+    public void oneLeave(Integer id) {
+        for (WebSocketAudioServer client : webSocketSet){
+            if(Objects.equals(client.userId, id)){
+                try {
+                    client.session.getBasicRemote().sendText("END");
+                    client.session.close();
+                    client.onClose();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                break;
+            }
         }
     }
 
@@ -289,7 +348,7 @@ public class WebSocketAudioServer {
         return this.session;
     }
 
-    private void Audio2Text(ByteArrayOutputStream outputStream) throws Exception {
+    /*private void Audio2Text(ByteArrayOutputStream outputStream) throws Exception {
         IatModelZhMain iatModelZhMain = new IatModelZhMain();
         System.out.println(outputStream.toString().length());
         if(this.voiceTime ==0) {
@@ -299,7 +358,7 @@ public class WebSocketAudioServer {
             iatModelZhMain.nextVoice(reSampling(outputStream.toByteArray()));
         }
         this.voiceTime++;
-    }
+    }*/
 
     private ByteArrayOutputStream reSampling(byte[] data) throws IOException, UnsupportedAudioFileException {
 
@@ -335,4 +394,7 @@ public class WebSocketAudioServer {
         }
         return outputStream;
     }
+
+
+
 }

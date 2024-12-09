@@ -8,6 +8,7 @@ import edu.hnu.conference_system.dto.*;
 import edu.hnu.conference_system.holder.UserHolder;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.*;
+import edu.hnu.conference_system.socket.WebSocketAudioServer;
 import edu.hnu.conference_system.utils.Base64Utils;
 import edu.hnu.conference_system.utils.FileToPicUtils;
 import edu.hnu.conference_system.vo.CreateMeetingVo;
@@ -15,7 +16,9 @@ import edu.hnu.conference_system.vo.FileShowVo;
 import edu.hnu.conference_system.vo.UserInfoVo;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -66,6 +69,10 @@ public class RoomServiceImpl implements RoomService {
 
     @Resource
     MeetingAudioService meetingAudioService;
+
+    @Lazy
+    @Autowired
+    WebSocketAudioServer webSocketAudioServer;
 
     @Override
     public CreateMeetingVo bookMeeting(BookMeetingDto bookMeetingDto) {
@@ -162,6 +169,7 @@ public class RoomServiceImpl implements RoomService {
                     Meeting meet = deleteRoom(user.getMeetingNumber(),user.getMeetingId());
                     meetingService.endMeeting(meet);
                 } else {
+                    webSocketAudioServer.oneLeave(user.getId());
                     leaveRoom(user.getMeetingNumber());
                 }
 
@@ -316,22 +324,8 @@ public class RoomServiceImpl implements RoomService {
             //找到要关闭的房间
             if(room.getMeetingNumber().equals(meetingNumber)) {
 
-                //开启一个线程去执行录音叠加,完成后将音频记录到数据库
-                //Thread t1 = new Thread(() -> {
-                    //录音叠加
-                    mergeAudios2One(meetingId);
-                    //叠加完成后将音频地址记录到数据库
-                    String thisAudioPath = audioPath+"/"+meetingId+"/"+"out.wav";
-                    meetingAudioService.recordAudio(meetingId,thisAudioPath);
-                    Long audioId = meetingAudioService.getAudioIdByMeetingId(meetingId);
-                    //将音频id插入到会议记录表里
-                    meeting.setMeetingAudioId(audioId);
-                //});
-                //t1.start();
-
                 //记录参会者
                 saveAllUserInMeeting(room);
-                //TODO 记录会议撰写等到数据库
 
                 //为meeting赋值
                 meeting.setMeetingId(meetingId);
@@ -342,8 +336,6 @@ public class RoomServiceImpl implements RoomService {
                 );
                 meeting.setParticipantCount(room.getMembersOn().size());
                 meeting.setMeetingState("end");
-
-                //TODO 保存会议转写等id到meeting表
 
 
                 //为每一个与会者插入记录索引表
@@ -356,11 +348,26 @@ public class RoomServiceImpl implements RoomService {
                     user.setMeetingNumber(null);
                     user.setMeetingId(null);
                     user.setMeetingPermission(-1);
+                    webSocketAudioServer.oneLeave(user.getId());
                     //room.getMembers().remove(user);
                 }
                 room.getMembersOn().clear();
                 //将这个房间从房间列表移除
                 roomList.remove(room);
+
+                //开启一个线程去执行录音叠加,完成后将音频记录到数据库
+                //Thread t1 = new Thread(() -> {
+                //录音叠加
+                mergeAudios2One(meetingId);
+                //叠加完成后将音频地址记录到数据库
+                String thisAudioPath = audioPath+"/"+meetingId+"/"+"out.wav";
+                meetingAudioService.recordAudio(meetingId,thisAudioPath);
+                Long audioId = meetingAudioService.getAudioIdByMeetingId(meetingId);
+                //将音频id插入到会议记录表里
+                meeting.setMeetingAudioId(audioId);
+                //});
+                //t1.start();
+
                 break;
 
             }
@@ -393,6 +400,7 @@ public class RoomServiceImpl implements RoomService {
                 for(User user : room.getMembersOn()) {
                     System.out.println("找到人");
                     userInfoVos.add(userInfoService.buildUserInfoVo(user.getId()));
+
                 }
                 break;
             }
@@ -485,6 +493,7 @@ public class RoomServiceImpl implements RoomService {
                         user.setMeetingId(null);
                         user.setMeetingPermission(-1);
                         room.getMembersOn().remove(user);
+                        webSocketAudioServer.kickOneOut(kickDto.getId());
                         return Result.success("成功踢出"+user.getUsername());
                     }
                 }
@@ -515,7 +524,11 @@ public class RoomServiceImpl implements RoomService {
         String dirPath = filePath + "/"+fileNameWithoutExt+"_"+meetingNumber+"_"+UserHolder.getUserInfo().getUserName();
         File fileDir = new File(dirPath);
         try{
-            fileDir.mkdirs();
+            if(fileDir.mkdirs()){
+                System.out.println("创建文件夹成功:"+dirPath);
+            }else{
+                System.out.println("创建文件夹失败:"+dirPath);
+            }
         }catch (Exception e){
             throw new RuntimeException(e);
         }
@@ -524,6 +537,13 @@ public class RoomServiceImpl implements RoomService {
         try {
             //byte[] bytes = file.getBytes();
             File newFile = new File(path);
+            if(!newFile.exists()){
+                if(newFile.createNewFile()){
+                    System.out.println("创建文件成功:"+path);
+                }else{
+                    System.out.println("创建文件失败:"+path);
+                }
+            }
             file.transferTo(newFile);
 
             Long meetingId = null;
@@ -537,7 +557,7 @@ public class RoomServiceImpl implements RoomService {
             FileDto fileDto = new FileDto(meetingId,fileName,fileType,path);
             fileService.insertFile(fileDto);
 
-            pushFileToAll(UserHolder.getUserInfo().getUserName(), fileName,path);
+            pushFileToAll(meetingId,UserHolder.getUserInfo().getUserName(), fileName,path);
 
 
             return Result.success("上传成功!");
@@ -551,7 +571,7 @@ public class RoomServiceImpl implements RoomService {
      * @param path
      */
     @Override
-    public void pushFileToAll(String UploadUserName,String fileName,String path) throws Exception {
+    public void pushFileToAll(Long meetingId,String UploadUserName,String fileName,String path) throws Exception {
         FileShowVo fileShowVo = new FileShowVo(fileName,UploadUserName,0,new ArrayList<>());
 
         //将文件转化成图片以便传输, 转换后得到的是一个文件夹,里面以1.jpg 2.jpg这样命名
@@ -574,7 +594,7 @@ public class RoomServiceImpl implements RoomService {
             fileShowVo.getFilePics().add(Base64Utils.encode(pic));
         }
 
-        //TODO 将文件推送给所有人
+        webSocketAudioServer.pushFile2All(meetingId,fileShowVo);
     }
 
     private void mergeAudios2One(Long meetingId){
@@ -584,7 +604,7 @@ public class RoomServiceImpl implements RoomService {
 
         try {
             // 创建进程
-            ProcessBuilder processBuilder = new ProcessBuilder("python", pythonScriptPath, dirPath);
+            ProcessBuilder processBuilder = new ProcessBuilder("python3", pythonScriptPath, dirPath);
             processBuilder.redirectErrorStream(true); // 合并标准输出和错误输出
             Process process = processBuilder.start();
 

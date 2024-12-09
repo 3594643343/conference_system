@@ -34,4 +34,6 @@ public interface UserAndGroupService extends IService<UserAndGroup> {
     void directJoinGroup(Integer groupId, Integer userId);
 
     Result getIsIn(Integer userId, Integer groupId);
+
+    Result kickOneOut(Integer groupId, Integer userId);
 }

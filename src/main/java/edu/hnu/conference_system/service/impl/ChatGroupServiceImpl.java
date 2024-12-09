@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,8 +63,16 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         chatGroup.setGroupCreateTime(LocalDateTime.now());
         chatGroup.setGroupName(groupDto.getGroupName());
         chatGroup.setNeedCheck(groupDto.getNeedCheck());
-        String thisAvatarPath = avatarPath +"/"+ UserHolder.getUserId()+"_"+groupDto.getGroupName()+".jpg";
+        String thisAvatarPath = avatarPath +"/"+ UserHolder.getUserId()+"_"+groupDto.getGroupName()+ LocalTime.now()+".jpg";
         File file = new File(thisAvatarPath);
+        if(!file.exists()){
+            try {
+                file.createNewFile();
+            }catch (IOException e){
+                System.out.println("创建群头像文件失败!"+e.getMessage());
+            }
+
+        }
         try{
             groupDto.getGroupAvatar().transferTo(file);
         } catch (IOException e) {

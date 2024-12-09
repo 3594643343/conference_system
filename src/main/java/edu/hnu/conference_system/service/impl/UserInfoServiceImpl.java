@@ -81,7 +81,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
             String token = generateTokenForUser(userDto);
             User user1 = new User(user.getUserId(), user.getUserName(), null, null, -1, null);
             userList.add(user1);
-            LoginVo loginVo = new LoginVo(user.getIsAdmin(), token);
+            LoginVo loginVo = new LoginVo(user.getUserId(),user.getIsAdmin(), token);
             return Result.success(loginVo);
         } else {
             return Result.error("密码错误!");
@@ -184,16 +184,25 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         if (!saveResult) {
             return Result.error("内部错误:新增用户失败!");
         }
-        String avatarPath = filePath+"/"+userInfo.getUserId()+".jpg";
-        userInfo.setAvatarPath(avatarPath);
-        boolean f = setDefaultAvatar(avatarPath);
-        if(!f){
-            return Result.error("内部错误:设置默认头像失败!");
+        try {
+            String avatarPath = filePath + "/" + userInfo.getUserId() + ".jpg";
+            userInfo.setAvatarPath(avatarPath);
+            boolean f = setDefaultAvatar(avatarPath);
+            if (!f) {
+                userMapper.deleteById(userInfo.getUserId());
+                return Result.error("内部错误:设置默认头像失败!");
+            }
+            userMapper.update(userInfo, new UpdateWrapper<UserInfo>().eq("user_id", userInfo.getUserId()));
+        }catch (Exception e) {
+            userMapper.deleteById(userInfo.getUserId());
         }
-        userMapper.update(userInfo, new UpdateWrapper<UserInfo>().eq("user_id", userInfo.getUserId()));
         return Result.success(userInfo.getUserId());
     }
     private Boolean setDefaultAvatar(String path) throws IOException {
+        File file0 = new File(path);
+        if(!file0.exists()){
+            file0.createNewFile();
+        }
         FileOutputStream file = new FileOutputStream(path);
         FileInputStream fis = null;
         try {
@@ -250,9 +259,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         UserInfo newUserInfo = new UserInfo();
         newUserInfo.setUserName(userInfoDto.getUserName());
 
-        if(userInfoDto.getNeedCheck() != null){
-            newUserInfo.setNeedCheck(userInfoDto.getNeedCheck());
-        }
+
         newUserInfo.setUserSignature(userInfoDto.getSignature());
 
         userMapper.update(newUserInfo,new UpdateWrapper<UserInfo>().eq("user_id", UserHolder.getUserId()));
@@ -344,6 +351,9 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         List<UserInfoVo> users = new ArrayList<>();
         List<UserInfo> userInfos = userMapper.selectList(null);
         for(UserInfo userInfo:userInfos){
+            if(userInfo.getIsAdmin()){
+                continue;
+            }
             UserInfoVo userInfoVo = new UserInfoVo();
             userInfoVo.setId(userInfo.getUserId());
             userInfoVo.setUsername(userInfo.getUserName());
@@ -363,6 +373,15 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         userInfoVo.setSignature(userInfo.getUserSignature());
         userInfoVo.setAvatar(Base64Utils.encode(userInfo.getAvatarPath()));
         return userInfoVo;
+    }
+
+    @Override
+    public Result changeNeedCheck(Integer needCheck) {
+        Integer id =UserHolder.getUserId();
+        UserInfo userInfo = userMapper.selectById(id);
+        userInfo.setNeedCheck(needCheck);
+        userMapper.update(userInfo,new UpdateWrapper<UserInfo>().eq("user_id", id));
+        return Result.success("已修改!");
     }
 
 

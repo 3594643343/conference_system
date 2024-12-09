@@ -41,7 +41,7 @@ public interface RoomService {
 
     Result uploadFile(UploadFileDto uploadFileDto);
 
-    void pushFileToAll(String UploadUserName,String fileName,String path) throws Exception;
+    void pushFileToAll(Long meetingId,String UploadUserName,String fileName,String path) throws Exception;
 
     Result joinFromSchedule(String meetingNumber);
 

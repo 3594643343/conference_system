@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import edu.hnu.conference_system.domain.Meeting;
+import edu.hnu.conference_system.domain.MeetingAudio;
 import edu.hnu.conference_system.mapper.MeetingMapper;
 import edu.hnu.conference_system.service.*;
 import edu.hnu.conference_system.vo.*;
@@ -143,9 +144,10 @@ public class MeetingServiceImpl extends ServiceImpl<MeetingMapper, Meeting>
 
     @Override
     public Long getMeetingAudioId(Long meetingId) {
-        return meetingMapper.selectOne(
+        Meeting m  = meetingMapper.selectOne(
                 new QueryWrapper<Meeting>().eq("meeting_id",meetingId)
-        ).getMeetingAudioId();
+        );
+        return m.getMeetingAudioId();
     }
 
 }

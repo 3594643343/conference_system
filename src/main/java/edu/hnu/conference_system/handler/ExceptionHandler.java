@@ -20,6 +20,7 @@ public class ExceptionHandler {
             msg = msg.substring(msg.lastIndexOf('[') + 1, msg.indexOf(']'));
         }
         //log.error("全局异常信息 ex = {}", msg, e);
+        System.out.println(msg);
         return Result.error(msg);
     }
 }*/

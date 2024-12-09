@@ -4,6 +4,7 @@ package edu.hnu.conference_system.controller;
 import edu.hnu.conference_system.dto.AddGroupDto;
 import edu.hnu.conference_system.dto.ChangeGroupDto;
 import edu.hnu.conference_system.dto.CreateGroupDto;
+import edu.hnu.conference_system.dto.KickDto;
 import edu.hnu.conference_system.holder.UserHolder;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.ChatGroupService;
@@ -106,6 +107,12 @@ public class GroupController {
         else{
             return userAndGroupService.leaveGroup(UserHolder.getUserId(),groupId);
         }
+    }
+
+    @DeleteMapping("/kick")
+    @Operation(summary = "踢人")
+    public Result kickOneOut(@RequestParam("groupId") Integer groupId,@RequestParam("userId") Integer userId){
+        return userAndGroupService.kickOneOut(groupId,userId);
     }
 
     @GetMapping("/record")

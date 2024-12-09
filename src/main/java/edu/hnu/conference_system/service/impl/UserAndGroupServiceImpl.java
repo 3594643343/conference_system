@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
 * @author lenovo
@@ -208,6 +209,27 @@ public class UserAndGroupServiceImpl extends ServiceImpl<UserAndGroupMapper, Use
                 new QueryWrapper<UserAndGroup>().eq("user_id",userId).eq("group_id",groupId)
         );
         return Result.success(userAndGroup.getIsIn() == 1);
+    }
+
+    @Override
+    public Result kickOneOut(Integer groupId, Integer userId) {
+        if (!Objects.equals(chatGroupService.getGroupCreatorId(groupId), UserHolder.getUserId())){
+            return Result.error("权限不足!");
+        }
+        if (Objects.equals(chatGroupService.getGroupCreatorId(groupId), userId)){
+            return Result.error("无法踢出自己!");
+        }
+
+        UserAndGroup userAndGroup = userAndGroupMapper.selectOne(
+                new QueryWrapper<UserAndGroup>().eq("group_id", groupId).eq("user_id", userId)
+        );
+        if (userAndGroup == null){
+            return Result.error("用户不在群中!");
+        }
+
+        userAndGroup.setIsIn(0);
+        userAndGroupMapper.updateById(userAndGroup);
+        return Result.success("已踢出: "+userId);
     }
 
 }

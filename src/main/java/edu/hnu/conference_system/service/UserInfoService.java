@@ -47,6 +47,8 @@ public interface UserInfoService extends IService<UserInfo> {
 
     UserInfoVo getUserInfo(Integer friendId);
 
+    Result changeNeedCheck(Integer needCheck);
+
 
     //Result getUserInfo(Long );
 

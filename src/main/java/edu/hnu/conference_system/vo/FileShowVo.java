@@ -19,10 +19,6 @@ public class FileShowVo {
      */
     private String fileName;
     /**
-     * 上传者用户名
-     */
-    private String uploadUserName;
-    /**
      * 页数
      */
     private int pageNumber;

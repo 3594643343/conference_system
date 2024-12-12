@@ -49,6 +49,8 @@ public interface RoomService {
 
     String getAudioPath();
 
+    Result getFileList(Integer userId);
+
 
     //Result getUserDetail(Map<String,String> request);
 }

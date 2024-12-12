@@ -82,6 +82,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
             User user1 = new User(user.getUserId(), user.getUserName(), null, null, -1, null);
             userList.add(user1);
             LoginVo loginVo = new LoginVo(user.getUserId(),user.getIsAdmin(), token);
+            System.out.println("用户id: "+user.getUserId()+"用户名: "+user.getUserName()+"登陆");
             return Result.success(loginVo);
         } else {
             return Result.error("密码错误!");
@@ -382,6 +383,17 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         userInfo.setNeedCheck(needCheck);
         userMapper.update(userInfo,new UpdateWrapper<UserInfo>().eq("user_id", id));
         return Result.success("已修改!");
+    }
+
+    @Override
+    public int exitSystem(Integer userId) {
+        for(User user:userList){
+            if(Objects.equals(userId, user.getId())){
+                userList.remove(user);
+                return 1;
+            }
+        }
+        return 0;
     }
 
 

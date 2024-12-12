@@ -22,6 +22,6 @@ public class PmChangeDto {
     /**
      * 要修改到的权限  与会者0, 管理员1
      */
-    private int Permission;
+    private Integer Permission;
 
 }

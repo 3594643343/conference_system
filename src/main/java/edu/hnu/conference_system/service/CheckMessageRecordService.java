@@ -24,4 +24,6 @@ public interface CheckMessageRecordService extends IService<CheckMessageRecord> 
     void refuseGroupCheck(Integer recordId);
 
     void passGroupCheck(Integer recordId);
+
+    Result getOnesAllCheckMessage(Integer userId);
 }

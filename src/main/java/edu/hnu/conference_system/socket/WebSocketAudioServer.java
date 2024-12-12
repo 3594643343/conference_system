@@ -98,6 +98,7 @@ public class WebSocketAudioServer {
         this.wavPath = dirPath+"/" +userId + ".wav";
         File file = new File(wavPath);
         file.createNewFile();
+        broadcast2Others("SomeOneIn");
         System.out.println("用户id:" + userId + "  加入会议:" + meetingId );
     }
 
@@ -109,6 +110,7 @@ public class WebSocketAudioServer {
         meetingUsers.remove(this.userId);
         webSocketSet.remove(this);
         byteArrayOutputStreamConcurrentHashMap.remove(userId);
+        broadcast2Others("SomeOneOut");
         System.out.println("用户id:" + this.userId + "  离开会议:" + this.meetingId );
     }
 
@@ -264,6 +266,21 @@ public class WebSocketAudioServer {
             }
         }
     }
+
+    /**
+     * 广播给除了自己外的用户
+     *
+     * @param msg 消息
+     */
+    protected <T> void broadcast2Others(Long meetingId,T msg) throws IOException {
+        for (WebSocketAudioServer client : webSocketSet){
+            if(Objects.equals(client.meetingId, meetingId)){
+                if(!Objects.equals(client.userId, this.userId)){
+                    client.call(msg);
+                }
+            }
+        }
+    }
     /**
      * 广播给除了自己外的用户
      *
@@ -314,6 +331,10 @@ public class WebSocketAudioServer {
         broadcast2All(meetingId,jsonObject.toString());
     }
 
+    public void tellAllFileUploaded(Long meetingId) throws IOException {
+        broadcast2Others(meetingId,"NEW_FILE");
+    }
+
     public void kickOneOut(Integer id){
         for (WebSocketAudioServer client : webSocketSet){
             if(Objects.equals(client.userId, id)){
@@ -329,7 +350,36 @@ public class WebSocketAudioServer {
         }
     }
 
-    public void oneLeave(Integer id) {
+    public void oneIn(Long meetingId, Integer id) {
+        for (WebSocketAudioServer client : webSocketSet){
+            if(Objects.equals(client.userId, id)){
+                try {
+                    broadcast2Others(meetingId,"IN");
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+    }
+
+    public void oneLeave(Long meetingId,Integer id) {
+        for (WebSocketAudioServer client : webSocketSet){
+            if(Objects.equals(client.userId, id)){
+                try {
+                    broadcast2Others(meetingId,"ONE_LEAVE");
+                    client.session.getBasicRemote().sendText("END");
+                    client.session.close();
+                    client.onClose();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+    }
+
+    public void roomEnd(Integer id) {
         for (WebSocketAudioServer client : webSocketSet){
             if(Objects.equals(client.userId, id)){
                 try {

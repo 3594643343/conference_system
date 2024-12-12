@@ -1,13 +1,18 @@
 package edu.hnu.conference_system.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.hnu.conference_system.domain.CheckMessageRecord;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.CheckMessageRecordService;
 import edu.hnu.conference_system.mapper.CheckMessageRecordMapper;
+import edu.hnu.conference_system.vo.CheckMessageVo;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
 * @author lenovo
@@ -39,8 +44,10 @@ public class CheckMessageRecordServiceImpl extends ServiceImpl<CheckMessageRecor
         checkMessageRecord.setMessage(checkWords);
         checkMessageRecord.setAnotherId(friendId);
         checkMessageRecordMapper.insert(checkMessageRecord);
+        Integer recordId = checkMessageRecord.getRecordId();
 
         //插入接收方记录
+        checkMessageRecord = new CheckMessageRecord();
         checkMessageRecord.setUserId(friendId);
         checkMessageRecord.setIsSender(0);
         checkMessageRecord.setResult(0);
@@ -48,7 +55,7 @@ public class CheckMessageRecordServiceImpl extends ServiceImpl<CheckMessageRecor
         checkMessageRecord.setAnotherId(senderId);
         checkMessageRecordMapper.insert(checkMessageRecord);
 
-        return checkMessageRecord.getRecordId();
+        return recordId;
     }
 
     @Override
@@ -63,8 +70,10 @@ public class CheckMessageRecordServiceImpl extends ServiceImpl<CheckMessageRecor
         checkMessageRecord.setMessage(checkWords);
         checkMessageRecord.setAnotherId(creatorId);
         checkMessageRecordMapper.insert(checkMessageRecord);
+        Integer recordId = checkMessageRecord.getRecordId();
 
         //插入接收方记录
+        checkMessageRecord = new CheckMessageRecord();
         checkMessageRecord.setUserId(creatorId);
         checkMessageRecord.setIsSender(0);
         checkMessageRecord.setResult(0);
@@ -73,7 +82,7 @@ public class CheckMessageRecordServiceImpl extends ServiceImpl<CheckMessageRecor
         checkMessageRecord.setAnotherId(senderId);
         checkMessageRecordMapper.insert(checkMessageRecord);
 
-        return checkMessageRecord.getRecordId();
+        return recordId;
     }
 
     @Override
@@ -110,6 +119,35 @@ public class CheckMessageRecordServiceImpl extends ServiceImpl<CheckMessageRecor
         checkMessageRecordMapper.update(checkMessageRecord, new UpdateWrapper<CheckMessageRecord>()
                 .eq("record_id", recordId)
         );
+    }
+
+    @Override
+    public Result getOnesAllCheckMessage(Integer userId) {
+        List<CheckMessageRecord> records = checkMessageRecordMapper.selectList(
+                new QueryWrapper<CheckMessageRecord>().eq("user_id", userId)
+        );
+        List<CheckMessageVo> checkMessageVos = new ArrayList<>();
+        for (CheckMessageRecord record : records) {
+            CheckMessageVo checkMessageVo = new CheckMessageVo();
+            checkMessageVo.setRecordId(record.getRecordId());
+            checkMessageVo.setMessage(record.getMessage());
+            checkMessageVo.setResult(record.getResult());
+            if(record.getIsSender() == 1){
+                //是发送方
+                checkMessageVo.setSenderId(userId);
+                checkMessageVo.setReceiverId(record.getAnotherId());
+                checkMessageVo.setGroupId(record.getGroupId());
+            }else if(record.getIsSender() == 0){
+                //是接收方
+                checkMessageVo.setSenderId(record.getAnotherId());
+                checkMessageVo.setReceiverId(userId);
+                checkMessageVo.setGroupId(record.getGroupId());
+            }else{
+                return Result.error("获取验证消息失败!");
+            }
+            checkMessageVos.add(checkMessageVo);
+        }
+        return Result.success(checkMessageVos);
     }
 
 }

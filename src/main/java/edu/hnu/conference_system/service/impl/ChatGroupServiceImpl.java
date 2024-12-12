@@ -89,10 +89,10 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
     public Result changeGroupInfo(ChangeGroupDto groupDto) {
         UpdateWrapper<ChatGroup> updateWrapper = new UpdateWrapper<ChatGroup>();
         updateWrapper.eq("group_id", groupDto.getGroupId());
-        if(groupDto.getGroupName() != null) {
+        if(groupDto.getGroupName() != null && !groupDto.getGroupName().equals("")) {
             updateWrapper.set("group_name", groupDto.getGroupName());
         }
-        if(groupDto.getAvatar() != null) {
+        if(groupDto.getAvatar() != null&& !groupDto.getAvatar().equals("")) {
             try {
                 File oldAvatar = new File(findGroupAvatarPathById(groupDto.getGroupId()));
                 groupDto.getAvatar().transferTo(oldAvatar);
@@ -100,7 +100,7 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
                 return Result.error("更新群信息失败: "+e.getMessage());
             }
         }
-        if(groupDto.getNeedCheck() != null) {
+        if(groupDto.getNeedCheck() != null&& !groupDto.getNeedCheck().equals("")) {
             updateWrapper.set("need_check", groupDto.getNeedCheck());
         }
         chatGroupMapper.update(updateWrapper);
@@ -121,6 +121,7 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         groupInfoVo.setGroupName(chatGroup.getGroupName());
         groupInfoVo.setCreatorName(userInfoService.getNameById(chatGroup.getGroupCreatorId()));
         groupInfoVo.setGroupAvatar(Base64Utils.encode(chatGroup.getGroupAvatarPath()));
+        groupInfoVo.setIsIn(userAndGroupService.getIsIn(UserHolder.getUserId(),groupId));
         return Result.success(groupInfoVo);
 
     }

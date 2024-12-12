@@ -49,6 +49,8 @@ public interface UserInfoService extends IService<UserInfo> {
 
     Result changeNeedCheck(Integer needCheck);
 
+    int exitSystem(Integer userId);
+
 
     //Result getUserInfo(Long );
 

@@ -12,6 +12,7 @@ import edu.hnu.conference_system.socket.WebSocketAudioServer;
 import edu.hnu.conference_system.utils.Base64Utils;
 import edu.hnu.conference_system.utils.FileToPicUtils;
 import edu.hnu.conference_system.vo.CreateMeetingVo;
+import edu.hnu.conference_system.vo.FileListVo;
 import edu.hnu.conference_system.vo.FileShowVo;
 import edu.hnu.conference_system.vo.UserInfoVo;
 import jakarta.annotation.Resource;
@@ -123,7 +124,9 @@ public class RoomServiceImpl implements RoomService {
                 }
                 //创建者加入会议, 开始会议
                 startMeeting(meeting);
-
+                System.out.println("会议"+meetingNumber+"开始!");
+                System.out.println("用户id: "+ UserHolder.getUserId()+"用户名"+UserHolder.getUserInfo().getUserName()+
+                        "加入了会议: "+meetingNumber);
                 return Result.success("加入会议成功!");
             }
             else{
@@ -143,6 +146,8 @@ public class RoomServiceImpl implements RoomService {
                         break;
                     }
                 }
+                System.out.println("用户id: "+ UserHolder.getUserId()+"用户名"+UserHolder.getUserInfo().getUserName()+
+                        "加入了会议: "+meetingNumber);
                 return Result.success("加入会议成功!");
             }
             else{
@@ -160,8 +165,10 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Result leaveMeeting() {
+        System.out.println("leaveMeeting调用");
         for (User user : userList) {
             if (Objects.equals(user.getId(), UserHolder.getUserId())) {
+
                 if (user.getMeetingPermission() == 2) {
                     //用户在某个会议中权限为2及创建者, 退出会议即为结束会议
                     //System.out.println(user.getId()+" "+user.getMeetingNumber()+" "+ user.getMeetingPermission());
@@ -169,7 +176,9 @@ public class RoomServiceImpl implements RoomService {
                     Meeting meet = deleteRoom(user.getMeetingNumber(),user.getMeetingId());
                     meetingService.endMeeting(meet);
                 } else {
-                    webSocketAudioServer.oneLeave(user.getId());
+
+
+                    webSocketAudioServer.oneLeave(user.getMeetingId(),user.getId());
                     leaveRoom(user.getMeetingNumber());
                 }
 
@@ -247,6 +256,26 @@ public class RoomServiceImpl implements RoomService {
         return audioPath;
     }
 
+    @Override
+    public Result getFileList(Integer userId) {
+        String roomNumber = null;
+        for(User user:userList){
+            if(Objects.equals(user.getId(), userId)){
+                roomNumber = user.getMeetingNumber();
+            }
+        }
+        for(Room room:roomList){
+            if(Objects.equals(room.getMeetingNumber(), roomNumber)){
+                List<FileListVo> fileListVos = new ArrayList<>();
+                for(String id:room.getFileIdList()){
+                    fileListVos.add(fileService.buildFileListVo(id));
+                }
+                return Result.success(fileListVos);
+            }
+        }
+        return Result.error("获取文件列表失败!");
+    }
+
 
     private void startMeeting(Meeting meeting) {
         addRoom(meeting);
@@ -263,7 +292,7 @@ public class RoomServiceImpl implements RoomService {
      */
     private void addRoom(Meeting meeting) {
         Room room = new Room(meeting.getMeetingName(),meeting.getMeetingId(), meeting.getMeetingNumber(), LocalDateTime.now(),
-                meeting.getDefaultPermission(), meeting.getUserId(),new ArrayList<>(),new ArrayList<>());
+                meeting.getDefaultPermission(), meeting.getUserId(),new ArrayList<>(),new ArrayList<>(),new ArrayList<>());
 
         for(User user : userList) {
             if(user.getId().equals(UserHolder.getUserId())) {
@@ -277,13 +306,23 @@ public class RoomServiceImpl implements RoomService {
         }
         roomList.add(room);
         System.out.println("房间号:"+room.getMeetingNumber()+" 房间名:"+room.getRoomName()+" 上线");
-        System.out.println("当前共有"+roomList.size()+"个房间");
+        System.out.println("当前共有"+roomList.size()+"个房间"+"为:");
+        for(Room room1:roomList){
+            System.out.println("会议号: "+room1.getMeetingNumber());
+        }
+        System.out.println("-------------------------------------");
     }
 
     private void joinRoom(String meetingNumber,User user) {
         for (Room room : roomList) {
             if(room.getMeetingNumber().equals(meetingNumber)) {
+                //System.out.println("用户id: "+user.getId()+"加入房间: "+meetingNumber);
                 room.getMembersOn().add(user);
+                webSocketAudioServer.oneIn(room.getMeetingId(),user.getId());
+                /*System.out.println("当前房间共有"+room.getMembersOn().size()+"人, 如下:  ");
+                for (User user1 : room.getMembersOn()) {
+                    System.out.println("用户id:  "+user1.getId());
+                }*/
                 //所有用户列表中没有该用户则加入该用户
                 if(!room.getMembersAll().contains(user.getId())) {
                     room.getMembersAll().add(user.getId());
@@ -295,17 +334,23 @@ public class RoomServiceImpl implements RoomService {
     }
 
     private void leaveRoom(String meetingNumber) {
+
         for (Room room : roomList) {
             if(room.getMeetingNumber().equals(meetingNumber)) {
+
                 for(User user : room.getMembersOn()) {
+                    //System.out.println("user列表中id:"+user.getId()+"  此时id:"+UserHolder.getUserId());
                     if(user.getId().equals(UserHolder.getUserId())) {
+
                         //将离开会议的user与会议相关的变量清空,再把它从这个房间里踢出
                         user.setMeetingNumber(null);
                         user.setMeetingId(null);
                         user.setMeetingPermission(-1);
                         room.getMembersOn().remove(user);
+                        System.out.println(user.getUsername()+"离开了房间:"+meetingNumber);
+                        break;
                     }
-                    break;
+
                 }
             }
             break;
@@ -348,7 +393,7 @@ public class RoomServiceImpl implements RoomService {
                     user.setMeetingNumber(null);
                     user.setMeetingId(null);
                     user.setMeetingPermission(-1);
-                    webSocketAudioServer.oneLeave(user.getId());
+                    webSocketAudioServer.roomEnd(user.getId());
                     //room.getMembers().remove(user);
                 }
                 room.getMembersOn().clear();
@@ -399,7 +444,9 @@ public class RoomServiceImpl implements RoomService {
                 System.out.println("找到房间");
                 for(User user : room.getMembersOn()) {
                     System.out.println("找到人");
-                    userInfoVos.add(userInfoService.buildUserInfoVo(user.getId()));
+                    UserInfoVo userInfoVo = userInfoService.buildUserInfoVo(user.getId());
+                    userInfoVo.setPermission(user.getMeetingPermission());
+                    userInfoVos.add(userInfoVo);
 
                 }
                 break;
@@ -550,12 +597,15 @@ public class RoomServiceImpl implements RoomService {
             for (Room room : roomList) {
                 if(room.getMeetingNumber().equals(meetingNumber)) {
                     meetingId = room.getMeetingId();
+                    //文件数据库记录该文件
+                    FileDto fileDto = new FileDto(meetingId,fileName,fileType,path);
+                    String fileId = fileService.insertFile(fileDto);
+                    //房间文件列表记录该文件的id
+                    room.getFileIdList().add(fileId);
+                    break;
                 }
             }
 
-            //文件数据库记录该文件
-            FileDto fileDto = new FileDto(meetingId,fileName,fileType,path);
-            fileService.insertFile(fileDto);
 
             pushFileToAll(meetingId,UserHolder.getUserInfo().getUserName(), fileName,path);
 
@@ -572,29 +622,13 @@ public class RoomServiceImpl implements RoomService {
      */
     @Override
     public void pushFileToAll(Long meetingId,String UploadUserName,String fileName,String path) throws Exception {
-        FileShowVo fileShowVo = new FileShowVo(fileName,UploadUserName,0,new ArrayList<>());
 
-        //将文件转化成图片以便传输, 转换后得到的是一个文件夹,里面以1.jpg 2.jpg这样命名
-        String fileType = fileName.substring(fileName.lastIndexOf(".")+1);
-        if(fileType.equals("ppt")){
-            fileShowVo.setPageNumber(FileToPicUtils.pptToPic(path));
+        /*//通过websocket分发
+        * 会导致websocket通话严重卡顿
+        webSocketAudioServer.pushFile2All(meetingId,fileShowVo);*/
 
-        }
-        else if (fileType.equals("pdf")) {
-            fileShowVo.setPageNumber(FileToPicUtils.pdfToPic(path));
-
-        }
-        else{
-            throw new RuntimeException("文件异常!");
-        }
-
-        String picsPath = path.substring(0,path.lastIndexOf("."))+"_PIC";
-        for(int i =0;i<fileShowVo.getPageNumber();i++){
-            String pic = picsPath+"/"+(i+1)+".jpg";
-            fileShowVo.getFilePics().add(Base64Utils.encode(pic));
-        }
-
-        webSocketAudioServer.pushFile2All(meetingId,fileShowVo);
+        //通过websocket通知会议中所有人发送获取文件请求
+        webSocketAudioServer.tellAllFileUploaded(meetingId);
     }
 
     private void mergeAudios2One(Long meetingId){

@@ -54,4 +54,6 @@ public class UserInfoController {
     public Result changePassword(PasswordChangeDto passwordChangeDto){
         return userInfoService.changePassword(passwordChangeDto);
     }
+
+
 }

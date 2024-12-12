@@ -56,6 +56,12 @@ public class Room {
      */
     private List<Integer> MembersAll;
 
+    /**
+     * 房间中文件的文件id
+     * @return
+     */
+    private List<String> fileIdList;
+
 
     @Override
     public String toString() {

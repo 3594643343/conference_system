@@ -38,7 +38,7 @@ public class GroupController {
     @GetMapping("/get/isin")
     @Operation(summary = "获取是否在该群中")
     public Result getIsIn(@RequestParam("groupId") Integer groupId) {
-        return userAndGroupService.getIsIn(UserHolder.getUserId(),groupId);
+        return userAndGroupService.getIsIn(UserHolder.getUserId(),groupId) ? Result.success(true): Result.success(false);
     }
 
     @GetMapping("/get/allGroupId")

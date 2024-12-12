@@ -98,7 +98,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         }
         UserContact userContact = userContactMapper.selectOne(
                 new QueryWrapper<UserContact>().eq("user_id", UserHolder.getUserId())
-                        .eq("friend_id", friendId)
+                        .eq("userfriend_id", friendId)
         );
 
         UserFriendVo userFriendVo = new UserFriendVo();
@@ -122,7 +122,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 .eq("user_id", UserHolder.getUserId()).eq("friend_id", friendId)
         );
         userContactMapper.update(userContact,new QueryWrapper<UserContact>()
-                .eq("friend_id", UserHolder.getUserId()).eq("user_id", friendId)
+                .eq("userfriend_id", UserHolder.getUserId()).eq("user_id", friendId)
         );
         return Result.success("删除好友成功!");
     }
@@ -141,11 +141,13 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         if(check == 0){
 
             checkMessageRecordService.refuseFriendCheck(recordId);
+            checkMessageRecordService.refuseFriendCheck(recordId+1);
             return Result.success("已拒绝"+frienId+"添加好友");
         }
         else{
 
             checkMessageRecordService.passFriendCheck(recordId);
+            checkMessageRecordService.passFriendCheck(recordId+1);
             makeFriendContact(frienId,UserHolder.getUserId());
             return getOnesAllFriend(UserHolder.getUserId());
         }
@@ -159,7 +161,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         List<Integer> friendIds = new ArrayList<>();
         for(UserContact uc : contacts){
             if(uc.getIsFriend() == 1){
-                friendIds.add(uc.getUserId());
+                friendIds.add(uc.getUserfriendId());
             }
         }
         return Result.success(friendIds);

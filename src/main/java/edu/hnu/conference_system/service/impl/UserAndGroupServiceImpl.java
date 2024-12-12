@@ -185,11 +185,13 @@ public class UserAndGroupServiceImpl extends ServiceImpl<UserAndGroupMapper, Use
         if(check == 0){
 
             checkMessageRecordService.refuseGroupCheck(recordId);
+            checkMessageRecordService.refuseGroupCheck(recordId+1);
             return Result.success("已拒绝申请");
         }
         else{
             checkMessageRecordService.passGroupCheck(recordId);
-            makeGroupContact(userId, groupId);
+            checkMessageRecordService.passGroupCheck(recordId+1);
+            makeGroupContact(groupId,userId);
             return Result.success("已同意申请");
         }
     }
@@ -204,11 +206,11 @@ public class UserAndGroupServiceImpl extends ServiceImpl<UserAndGroupMapper, Use
     }
 
     @Override
-    public Result getIsIn(Integer userId, Integer groupId) {
+    public Boolean getIsIn(Integer userId, Integer groupId) {
         UserAndGroup userAndGroup = userAndGroupMapper.selectOne(
                 new QueryWrapper<UserAndGroup>().eq("user_id",userId).eq("group_id",groupId)
         );
-        return Result.success(userAndGroup.getIsIn() == 1);
+        return userAndGroup.getIsIn() == 1;
     }
 
     @Override

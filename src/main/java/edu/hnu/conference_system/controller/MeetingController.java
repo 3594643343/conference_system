@@ -5,7 +5,9 @@ import edu.hnu.conference_system.dto.KickDto;
 import edu.hnu.conference_system.dto.MuteDto;
 import edu.hnu.conference_system.dto.PmChangeDto;
 import edu.hnu.conference_system.dto.UploadFileDto;
+import edu.hnu.conference_system.holder.UserHolder;
 import edu.hnu.conference_system.result.Result;
+import edu.hnu.conference_system.service.FileService;
 import edu.hnu.conference_system.service.MeetingService;
 import edu.hnu.conference_system.service.RoomService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +28,8 @@ public class MeetingController {
     MeetingService meetingService;
     @Resource
     RoomService roomService;
+    @Resource
+    FileService fileService;
 
 
     @GetMapping("/leave")
@@ -35,7 +39,7 @@ public class MeetingController {
     }
 
     @GetMapping("/userlist")
-    @Operation(summary = "在会用户信息(id、头像,昵称,个性签名)")
+    @Operation(summary = "在会用户信息(id、头像,昵称,个性签名,权限)")
     public Result getUserInfo(@RequestParam("meetingNumber") String meetingNumber){
         return roomService.getUserInfo(meetingNumber);
     }
@@ -70,6 +74,18 @@ public class MeetingController {
     public Result uploadFile(@RequestParam("file") MultipartFile file,@RequestParam("meetingNumber") String meetingNumber){
         UploadFileDto uploadFileDto = new UploadFileDto(meetingNumber,file);
         return roomService.uploadFile(uploadFileDto);
+    }
+
+    @GetMapping("/get/fileList")
+    @Operation(summary = "获取当前会议中文件列表")
+    public Result getFileList(){
+        return roomService.getFileList(UserHolder.getUserId());
+    }
+
+    @GetMapping("/download")
+    @Operation(summary = "下载某个文件")
+    public Result downloadFile(@RequestParam("fileId") String fileId){
+        return fileService.downloadFile(fileId);
     }
 
 }

@@ -4,6 +4,7 @@ package edu.hnu.conference_system.controller;
 import edu.hnu.conference_system.dto.AddFriendDto;
 import edu.hnu.conference_system.holder.UserHolder;
 import edu.hnu.conference_system.result.Result;
+import edu.hnu.conference_system.service.CheckMessageRecordService;
 import edu.hnu.conference_system.service.FriendChatRecordService;
 import edu.hnu.conference_system.service.UserContactService;
 import edu.hnu.conference_system.service.UserInfoService;
@@ -27,6 +28,9 @@ public class FriendController {
 
     @Resource
     FriendChatRecordService friendChatRecordService;
+
+    @Resource
+    CheckMessageRecordService checkMessageRecordService;
 
     @GetMapping("/get/allFriendId")
     @Operation(summary = "获取用户所有好友id")
@@ -75,6 +79,12 @@ public class FriendController {
     @Operation(summary = "获取与一个好友的聊天记录")
     public Result getFriendRecord(@RequestParam("friendId") Integer friendId) {
         return friendChatRecordService.getRecord(UserHolder.getUserId(),friendId);
+    }
+
+    @GetMapping("/checkmessage")
+    @Operation(summary = "获取一个人的所有验证消息")
+    public Result getAllCheckMessage(){
+        return checkMessageRecordService.getOnesAllCheckMessage(UserHolder.getUserId());
     }
 
 

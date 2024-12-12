@@ -17,7 +17,7 @@ public class FriendChatRecord implements Serializable {
     /**
      * 
      */
-    @TableId
+    //@TableId
     private Integer speakerId;
 
     /**

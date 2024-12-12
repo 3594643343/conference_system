@@ -26,4 +26,9 @@ public class UserInfoVo {
      */
     private String signature;
 
+    /**
+     * 用户权限  与会者0, 管理员1, 创建者2
+     */
+    private int permission;
+
 }

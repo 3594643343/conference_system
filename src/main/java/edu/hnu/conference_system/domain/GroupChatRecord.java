@@ -17,7 +17,7 @@ public class GroupChatRecord implements Serializable {
     /**
      * 
      */
-    @TableId
+    //@TableId
     private Integer groupId;
 
     /**

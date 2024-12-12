@@ -38,12 +38,19 @@ public class WebSocketChatServer {
     private Session session;
     private Integer userId;
 
+    private static UserInfoService userInfoService;
     private static ChatGroupService chatGroupService;
     private static UserAndGroupService userAndGroupService;
     private static UserContactService userContactService;
     private static FriendChatRecordService friendChatRecordService;
     private static GroupChatRecordService groupChatRecordService;
     private static CheckMessageRecordService checkMessageRecordService;
+
+
+    @Autowired
+    private void setUserInfoService(UserInfoService userInfoService) {
+        WebSocketChatServer.userInfoService = userInfoService;
+    }
 
     @Autowired
     private void setChatGroupService(ChatGroupService chatGroupService) {
@@ -89,6 +96,7 @@ public class WebSocketChatServer {
 
     @OnClose
     public void onClose() {
+        userInfoService.exitSystem(userId);
         webSocketSet.remove(this);
         onlineUsers.remove(userId);
         System.out.println("用户id: "+userId+" 离开了系统!");

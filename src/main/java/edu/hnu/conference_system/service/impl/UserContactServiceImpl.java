@@ -154,7 +154,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 webSocketChatServer.sendAddFriendMessage(UserHolder.getUserId(),frienId,"pass");
                 makeFriendContact(frienId,UserHolder.getUserId());
                 checkMessageRecordService.dealSameFriendRecord(recordId,check);
-                return getOnesAllFriend(UserHolder.getUserId());
+                return Result.success("已同意"+frienId+"添加好友");
             }
         }else{
             return Result.error("已是好友");

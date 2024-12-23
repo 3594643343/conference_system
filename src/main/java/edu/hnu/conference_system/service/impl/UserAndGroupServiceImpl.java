@@ -187,6 +187,7 @@ public class UserAndGroupServiceImpl extends ServiceImpl<UserAndGroupMapper, Use
 
                 checkMessageRecordService.refuseGroupCheck(recordId);
                 checkMessageRecordService.refuseGroupCheck(recordId+1);
+                checkMessageRecordService.dealSameGroupRecord(recordId,check);
                 return Result.success("已拒绝申请");
             }
             else{
@@ -194,11 +195,12 @@ public class UserAndGroupServiceImpl extends ServiceImpl<UserAndGroupMapper, Use
                 checkMessageRecordService.passGroupCheck(recordId+1);
                 webSocketChatServer.sendAddGroupMessage(UserHolder.getUserId(),userId);
                 makeGroupContact(groupId,userId);
+                checkMessageRecordService.dealSameGroupRecord(recordId,check);
                 return Result.success("已同意申请");
             }
-            checkMessageRecordService.dealSameGroupRecord(recordId,check);
+
         }else{
-            return  Result.error("该用户已在群聊!");
+            return  Result.error("用户已在群聊");
         }
 
     }

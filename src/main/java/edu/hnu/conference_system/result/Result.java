@@ -46,13 +46,13 @@ public class Result<T> implements Serializable {
         result.setData(data);
         return result;
     }
-    public static <T> Result<T> success(String message) {
+    /*public static <T> Result<T> success(String message) {
         Result<T> result = new Result<>();
         result.setTime(LocalDateTime.now());
         result.setCode(1);
         result.setMsg(message);
         return result;
-    }
+    }*/
 
     public static <T> Result<T> error(String message) {
         Result<T> result = new Result<>();

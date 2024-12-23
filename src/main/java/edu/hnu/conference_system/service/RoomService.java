@@ -51,6 +51,8 @@ public interface RoomService {
 
     Result getFileList(Integer userId);
 
+    Result getMeetingName(String meetingNumber);
+
 
     //Result getUserDetail(Map<String,String> request);
 }

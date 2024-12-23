@@ -96,7 +96,7 @@ public class WebSocketChatServer {
 
     @OnClose
     public void onClose() {
-        userInfoService.exitSystem(userId);
+        //userInfoService.exitSystem(userId);
         webSocketSet.remove(this);
         onlineUsers.remove(userId);
         System.out.println("用户id: "+userId+" 离开了系统!");
@@ -110,6 +110,14 @@ public class WebSocketChatServer {
      * 接收用户发送的聊天消息
      * @param userId
      * @param message0
+     *
+     * message0 格式示例:
+     * {
+     *     "receiverId":"100000001",
+     *     "isGroup":"0",
+     *     "time":"2024-12-25 20:34:12",
+     *     "content":"这是一条消息"
+     * }
      */
     @OnMessage
     public void onMessage(@PathParam("userId") Integer userId, String message0) throws IOException {
@@ -134,7 +142,7 @@ public class WebSocketChatServer {
         }
         else{
             //私聊
-            send2one(toWho,pairSendJson(userId,time,content));
+            send2one(toWho,pairSendJson(userId,time,content),true);
             //记录储存
             friendChatRecordService.insertRecord(this.userId,toWho,content,time);
         }
@@ -147,21 +155,31 @@ public class WebSocketChatServer {
      * @param sendJson
      * @throws IOException
      */
-    private void send2one(Integer toWho, String sendJson) throws IOException {
-        if(userContactService.beforeSendCheck(this.userId,toWho)){
+    private void send2one(Integer toWho, String sendJson,Boolean isChat) throws IOException {
+        if(isChat){
+            if(userContactService.beforeSendCheck(this.userId,toWho)){
+                for(WebSocketChatServer webSocketChatServer : webSocketSet){
+                    if(webSocketChatServer.userId.equals(toWho)){
+                        webSocketChatServer.session.getBasicRemote().sendText(sendJson);
+                        break;
+                    }
+                }
+                //没找到,说明不在线,放入消息仓库
+                //go2buffer(toWho,sendJson);
+            }
+            else{
+                //不是好友或删除了好友
+                this.session.getBasicRemote().sendText(sendJsonError("不是好友!"));
+            }
+        }else{
             for(WebSocketChatServer webSocketChatServer : webSocketSet){
                 if(webSocketChatServer.userId.equals(toWho)){
                     webSocketChatServer.session.getBasicRemote().sendText(sendJson);
                     break;
                 }
             }
-            //没找到,说明不在线,放入消息仓库
-            //go2buffer(toWho,sendJson);
         }
-        else{
-            //不是好友或删除了好友
-            this.session.getBasicRemote().sendText(sendJsonError("不是好友!"));
-        }
+
     }
 
     /**
@@ -201,6 +219,27 @@ public class WebSocketChatServer {
     }
 
     /**
+     * 不需要验证的加好友提示
+     * @param userId
+     * @param friendId
+     * @param checkWords
+     */
+    public void sendAddFriendMessage(Integer userId, Integer friendId, String checkWords){
+        for(WebSocketChatServer webSocketChatServer : webSocketSet){
+            if(webSocketChatServer.userId.equals(userId)){
+                try {
+                    webSocketChatServer.send2one(friendId,"NEW_FRIEND",false);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+            }
+        }
+    }
+
+
+
+    /**
      * 发送添加好友验证
      */
     public void sendAddFriendCheckMessage(Integer userId, Integer friendId, String checkWords) {
@@ -221,6 +260,24 @@ public class WebSocketChatServer {
 
         //没在线,转存仓库
         //go2buffer(friendId,message);
+    }
+
+    /**
+     * 同意加群验证后的题型
+     * @param userId
+     * @param applierId
+     */
+    public void sendAddGroupMessage(Integer userId, Integer applierId) {
+        for(WebSocketChatServer webSocketChatServer : webSocketSet){
+            if(webSocketChatServer.userId.equals(userId)){
+                try{
+                    webSocketChatServer.send2one(applierId,"PASS_ADD_GROUP",false);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+            }
+        }
     }
 
     /**
@@ -337,6 +394,9 @@ public class WebSocketChatServer {
         outerJson.set("data", innerJson);
         return outerJson.toString();
     }
+
+
+
 
     /**
      * 消息存入消息仓库

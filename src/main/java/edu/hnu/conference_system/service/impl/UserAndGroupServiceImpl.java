@@ -182,18 +182,32 @@ public class UserAndGroupServiceImpl extends ServiceImpl<UserAndGroupMapper, Use
 
     @Override
     public Result dealCheck(Integer recordId,Integer userId, Integer groupId, Integer check) {
-        if(check == 0){
+        if(!userInGroup(userId,groupId)){
+            if(check == 0){
 
-            checkMessageRecordService.refuseGroupCheck(recordId);
-            checkMessageRecordService.refuseGroupCheck(recordId+1);
-            return Result.success("已拒绝申请");
+                checkMessageRecordService.refuseGroupCheck(recordId);
+                checkMessageRecordService.refuseGroupCheck(recordId+1);
+                return Result.success("已拒绝申请");
+            }
+            else{
+                checkMessageRecordService.passGroupCheck(recordId);
+                checkMessageRecordService.passGroupCheck(recordId+1);
+                webSocketChatServer.sendAddGroupMessage(UserHolder.getUserId(),userId);
+                makeGroupContact(groupId,userId);
+                return Result.success("已同意申请");
+            }
+            checkMessageRecordService.dealSameGroupRecord(recordId,check);
+        }else{
+            return  Result.error("该用户已在群聊!");
         }
-        else{
-            checkMessageRecordService.passGroupCheck(recordId);
-            checkMessageRecordService.passGroupCheck(recordId+1);
-            makeGroupContact(groupId,userId);
-            return Result.success("已同意申请");
-        }
+
+    }
+
+    private boolean userInGroup(Integer userId, Integer groupId) {
+        UserAndGroup userAndGroup = userAndGroupMapper.selectOne(
+                new QueryWrapper<UserAndGroup>().eq("user_id", userId).eq("group_id", groupId)
+        );
+        return userAndGroup != null && userAndGroup.getIsIn() == 1;
     }
 
     @Override

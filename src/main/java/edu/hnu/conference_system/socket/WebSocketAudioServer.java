@@ -110,7 +110,7 @@ public class WebSocketAudioServer {
         meetingUsers.remove(this.userId);
         webSocketSet.remove(this);
         byteArrayOutputStreamConcurrentHashMap.remove(userId);
-        broadcast2Others("SomeOneOut");
+        //broadcast2Others("SomeOneOut");
         System.out.println("用户id:" + this.userId + "  离开会议:" + this.meetingId );
     }
 
@@ -332,16 +332,17 @@ public class WebSocketAudioServer {
     }
 
     public void tellAllFileUploaded(Long meetingId) throws IOException {
-        broadcast2Others(meetingId,"NEW_FILE");
+        broadcast2All(meetingId,"NEW_FILE");
     }
 
     public void kickOneOut(Integer id){
         for (WebSocketAudioServer client : webSocketSet){
             if(Objects.equals(client.userId, id)){
                 try {
+                    client.broadcast2Others(client.meetingId,"ONE_LEAVE");
                     client.session.getBasicRemote().sendText("END");
                     client.session.close();
-                    client.onClose();
+                    //client.onClose();
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -354,7 +355,7 @@ public class WebSocketAudioServer {
         for (WebSocketAudioServer client : webSocketSet){
             if(Objects.equals(client.userId, id)){
                 try {
-                    broadcast2Others(meetingId,"IN");
+                    client.broadcast2Others(meetingId,"IN");
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -367,10 +368,10 @@ public class WebSocketAudioServer {
         for (WebSocketAudioServer client : webSocketSet){
             if(Objects.equals(client.userId, id)){
                 try {
-                    broadcast2Others(meetingId,"ONE_LEAVE");
+                    client.broadcast2Others(meetingId,"ONE_LEAVE");
                     client.session.getBasicRemote().sendText("END");
                     client.session.close();
-                    client.onClose();
+                    //client.onClose();
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -385,7 +386,7 @@ public class WebSocketAudioServer {
                 try {
                     client.session.getBasicRemote().sendText("END");
                     client.session.close();
-                    client.onClose();
+                    //client.onClose();
                 }catch (Exception e){
                     e.printStackTrace();
                 }

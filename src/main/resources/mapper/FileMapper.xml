@@ -11,10 +11,13 @@
             <result property="fileType" column="file_type" jdbcType="CHAR"/>
             <result property="fileUploadTime" column="file_upload_time" jdbcType="TIMESTAMP"/>
             <result property="filePath" column="file_path" jdbcType="VARCHAR"/>
+            <result property="transformed" column="transformed" jdbcType="TINYINT"/>
+            <result property="pageNum" column="page_num" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         file_id,meeting_id,file_name,
-        file_type,file_upload_time,file_path
+        file_type,file_upload_time,file_path,
+        transformed,page_num
     </sql>
 </mapper>

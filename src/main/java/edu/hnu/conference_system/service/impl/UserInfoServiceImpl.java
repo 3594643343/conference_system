@@ -45,7 +45,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     /**
      * 存放在线的用户
      */
-    static List<User> userList = new ArrayList<>();
+    public static List<User> userList = new ArrayList<>();
 
     @Value("${files-upload-url.avatar}")
     private String filePath;
@@ -80,9 +80,20 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
             UserDto userDto = new UserDto(user.getUserId(), user.getUserName());
             String token = generateTokenForUser(userDto);
             User user1 = new User(user.getUserId(), user.getUserName(), null, null, -1, null);
+            for(User user2:userList){
+                if(user2.getId().equals(user1.getId())){
+                    user1 = user2;
+                    userList.remove(user2);
+                    break;
+                }
+            }
             userList.add(user1);
             LoginVo loginVo = new LoginVo(user.getUserId(),user.getIsAdmin(), token);
             System.out.println("用户id: "+user.getUserId()+"用户名: "+user.getUserName()+"登陆");
+            System.out.println("当前共有 "+userList.size()+" 人在线, 分别为:");
+            for (User user3 : userList) {
+                System.out.println("用户id: "+user3.getId()+"   用户名: "+user3.getUsername());
+            }
             return Result.success(loginVo);
         } else {
             return Result.error("密码错误!");
@@ -226,6 +237,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         userInfoVo.setUsername(userInfo.getUserName());
         userInfoVo.setAvatar(Base64Utils.encode(userInfo.getAvatarPath()));
         userInfoVo.setSignature(userInfo.getUserSignature());
+        userInfoVo.setNeedCheck(userInfo.getNeedCheck());
 
         return userInfoVo;
     }

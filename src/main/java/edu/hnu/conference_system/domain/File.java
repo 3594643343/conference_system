@@ -44,6 +44,16 @@ public class File implements Serializable {
      * 
      */
     private String filePath;
+    /**
+     *
+     *
+     */
+    private Integer transformed;
+    /**
+     *
+     *
+     */
+    private Integer pageNum;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

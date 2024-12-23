@@ -57,6 +57,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             return Result.success("已发送好友验证");
         }
         else{
+            webSocketChatServer.sendAddFriendMessage(UserHolder.getUserId(),friendId,checkWords);
             makeFriendContact(UserHolder.getUserId(),friendId);
             return Result.success("已添加 "+friendId);
         }
@@ -119,7 +120,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         UserContact userContact = new UserContact();
         userContact.setIsFriend(0);
         userContactMapper.update(userContact,new QueryWrapper<UserContact>()
-                .eq("user_id", UserHolder.getUserId()).eq("friend_id", friendId)
+                .eq("user_id", UserHolder.getUserId()).eq("userfriend_id", friendId)
         );
         userContactMapper.update(userContact,new QueryWrapper<UserContact>()
                 .eq("userfriend_id", UserHolder.getUserId()).eq("user_id", friendId)
@@ -138,19 +139,34 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
 
     @Override
     public Result dealCheck(Integer recordId,Integer frienId, Integer check) {
-        if(check == 0){
+        if(!isFriend(UserHolder.getUserId(),frienId)){
+            //不是好友, 添加为好友, 修改验证消息记录
+            if(check == 0){
 
-            checkMessageRecordService.refuseFriendCheck(recordId);
-            checkMessageRecordService.refuseFriendCheck(recordId+1);
-            return Result.success("已拒绝"+frienId+"添加好友");
+                checkMessageRecordService.refuseFriendCheck(recordId);
+                checkMessageRecordService.refuseFriendCheck(recordId+1);
+                checkMessageRecordService.dealSameFriendRecord(recordId,check);
+                return Result.success("已拒绝"+frienId+"添加好友");
+            }
+            else{
+                checkMessageRecordService.passFriendCheck(recordId);
+                checkMessageRecordService.passFriendCheck(recordId+1);
+                webSocketChatServer.sendAddFriendMessage(UserHolder.getUserId(),frienId,"pass");
+                makeFriendContact(frienId,UserHolder.getUserId());
+                checkMessageRecordService.dealSameFriendRecord(recordId,check);
+                return getOnesAllFriend(UserHolder.getUserId());
+            }
+        }else{
+            return Result.error("已是好友");
         }
-        else{
 
-            checkMessageRecordService.passFriendCheck(recordId);
-            checkMessageRecordService.passFriendCheck(recordId+1);
-            makeFriendContact(frienId,UserHolder.getUserId());
-            return getOnesAllFriend(UserHolder.getUserId());
-        }
+    }
+
+    private boolean isFriend(Integer userId, Integer frienId) {
+        UserContact userContact = userContactMapper.selectOne(
+                new QueryWrapper<UserContact>().eq("user_id", userId).eq("userfriend_id", frienId)
+        );
+        return userContact != null && userContact.getIsFriend() == 1;
     }
 
     @Override
@@ -175,7 +191,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         List<UserInfoVo> friendInfos = new ArrayList<>();
         for(UserContact uc : contacts){
             if(uc.getIsFriend() == 1){
-                friendInfos.add(userInfoService.getUserInfo(uc.getUserId()));
+                friendInfos.add(userInfoService.getUserInfo(uc.getUserfriendId()));
             }
         }
         return Result.success(friendInfos);

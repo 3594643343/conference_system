@@ -177,9 +177,11 @@ public class RoomServiceImpl implements RoomService {
                     meetingService.endMeeting(meet);
                 } else {
 
-
-                    webSocketAudioServer.oneLeave(user.getMeetingId(),user.getId());
+                    Long meetingId = user.getMeetingId();
                     leaveRoom(user.getMeetingNumber());
+
+                    webSocketAudioServer.oneLeave(meetingId,user.getId());
+
                 }
 
                 //System.out.println("存在"+roomList.size()+"个房间!");
@@ -276,6 +278,16 @@ public class RoomServiceImpl implements RoomService {
         return Result.error("获取文件列表失败!");
     }
 
+    @Override
+    public Result getMeetingName(String meetingNumber) {
+        for(Room room:roomList){
+            if(Objects.equals(room.getMeetingNumber(), meetingNumber)){
+                return Result.success(room.getRoomName());
+            }
+        }
+        return Result.error("未找到房间");
+    }
+
 
     private void startMeeting(Meeting meeting) {
         addRoom(meeting);
@@ -339,7 +351,7 @@ public class RoomServiceImpl implements RoomService {
             if(room.getMeetingNumber().equals(meetingNumber)) {
 
                 for(User user : room.getMembersOn()) {
-                    //System.out.println("user列表中id:"+user.getId()+"  此时id:"+UserHolder.getUserId());
+                    System.out.println("user列表中id:"+user.getId()+"  此时id:"+UserHolder.getUserId());
                     if(user.getId().equals(UserHolder.getUserId())) {
 
                         //将离开会议的user与会议相关的变量清空,再把它从这个房间里踢出
@@ -441,9 +453,9 @@ public class RoomServiceImpl implements RoomService {
         List<UserInfoVo> userInfoVos = new ArrayList<>();
         for (Room room : roomList) {
             if(room.getMeetingNumber().equals(meetingNumber)) {
-                System.out.println("找到房间");
+                //System.out.println("找到房间");
                 for(User user : room.getMembersOn()) {
-                    System.out.println("找到人");
+                    //System.out.println("找到人");
                     UserInfoVo userInfoVo = userInfoService.buildUserInfoVo(user.getId());
                     userInfoVo.setPermission(user.getMeetingPermission());
                     userInfoVos.add(userInfoVo);
@@ -509,6 +521,7 @@ public class RoomServiceImpl implements RoomService {
      */
     @Override
     public Result permissionChange(PmChangeDto pmChangeDto) {
+        System.out.println("房间号: "+pmChangeDto.getMeetingNumber()+"用户id: "+pmChangeDto.getId());
         for(Room room : roomList) {
             if(room.getMeetingNumber().equals(pmChangeDto.getMeetingNumber())) {
                 for(User user : room.getMembersOn()) {

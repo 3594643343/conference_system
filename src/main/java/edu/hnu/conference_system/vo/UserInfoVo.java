@@ -30,5 +30,10 @@ public class UserInfoVo {
      * 用户权限  与会者0, 管理员1, 创建者2
      */
     private int permission;
+    /**
+     * 是否加好友要验证 0:不需要 1:需要
+     */
+    private int needCheck;
+
 
 }

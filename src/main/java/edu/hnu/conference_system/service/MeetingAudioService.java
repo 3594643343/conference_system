@@ -16,4 +16,6 @@ public interface MeetingAudioService extends IService<MeetingAudio> {
     Long recordAudio(Long meetingId, String thisAudioPath);
 
     Long getAudioIdByMeetingId(Long meetingId);
+
+    String getAudioPathByMeetingId(Long meetingId);
 }

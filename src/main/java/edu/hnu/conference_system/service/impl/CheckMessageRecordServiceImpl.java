@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
 * @author lenovo
@@ -148,6 +149,32 @@ public class CheckMessageRecordServiceImpl extends ServiceImpl<CheckMessageRecor
             checkMessageVos.add(checkMessageVo);
         }
         return Result.success(checkMessageVos);
+    }
+
+    @Override
+    public void dealSameFriendRecord(Integer recordId,Integer result) {
+        dealSameRecord(recordId, result);
+
+    }
+
+    @Override
+    public void dealSameGroupRecord(Integer recordId, Integer check) {
+        dealSameRecord(recordId, check);
+    }
+
+    private void dealSameRecord(Integer recordId, Integer check) {
+        CheckMessageRecord checkMessageRecord = checkMessageRecordMapper.selectById(recordId);
+        Integer userId1 = checkMessageRecord.getUserId();
+        Integer userId2 = checkMessageRecord.getAnotherId();
+        List<CheckMessageRecord> checkMessageRecords = checkMessageRecordMapper.selectList(
+                new QueryWrapper<CheckMessageRecord>()
+                        .eq("user_id", userId1).eq("another_id", userId2)
+                        .or()
+                        .eq("user_id", userId2).eq("another_id", userId1)
+        );
+        for(CheckMessageRecord record : checkMessageRecords){
+            record.setResult(check);
+        }
     }
 
 }

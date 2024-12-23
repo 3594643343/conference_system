@@ -6,6 +6,8 @@ import edu.hnu.conference_system.dto.FileDto;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.vo.FileListVo;
 
+import java.util.List;
+
 /**
 * @author lenovo
 * @description 针对表【file】的数据库操作Service
@@ -17,4 +19,8 @@ public interface FileService extends IService<File> {
     FileListVo buildFileListVo(String id);
 
     Result downloadFile(String fileId);
+
+    List<FileListVo> getFileListByMeetingId(Long meetingId);
+
+    File getFileById(String fileId);
 }

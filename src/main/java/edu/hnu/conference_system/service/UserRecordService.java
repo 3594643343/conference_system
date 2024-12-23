@@ -3,8 +3,10 @@ package edu.hnu.conference_system.service;
 import edu.hnu.conference_system.domain.UserRecord;
 import com.baomidou.mybatisplus.extension.service.IService;
 import edu.hnu.conference_system.result.Result;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.net.http.HttpResponse;
 
 /**
 * @author lenovo
@@ -20,4 +22,12 @@ public interface UserRecordService extends IService<UserRecord> {
     Result getRecordDetail(Long recordId) throws IOException;
 
     void insertRecord(Integer userId, Long meetingId);
+
+    Result getFileList(Long recordId);
+
+    //Result downloadFile(String fileId);
+
+    Result downloadFile(HttpServletResponse response, String fileId);
+
+    Result downloadAudio(HttpServletResponse response, Long recordId);
 }

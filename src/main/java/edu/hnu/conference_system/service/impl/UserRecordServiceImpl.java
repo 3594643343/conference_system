@@ -2,18 +2,29 @@ package edu.hnu.conference_system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import edu.hnu.conference_system.domain.Room;
+import edu.hnu.conference_system.domain.User;
 import edu.hnu.conference_system.domain.UserRecord;
+import edu.hnu.conference_system.mapper.FileMapper;
 import edu.hnu.conference_system.result.Result;
 import edu.hnu.conference_system.service.*;
 import edu.hnu.conference_system.mapper.UserRecordMapper;
+import edu.hnu.conference_system.vo.FileListVo;
 import edu.hnu.conference_system.vo.RecordDetailVo;
 import edu.hnu.conference_system.vo.RecordVo;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import static edu.hnu.conference_system.service.impl.UserInfoServiceImpl.userList;
 
 /**
 * @author lenovo
@@ -38,6 +49,8 @@ public class UserRecordServiceImpl extends ServiceImpl<UserRecordMapper, UserRec
     private RecordService recordService;
     @Resource
     private MeetingAudioService meetingAudioService;
+    @Resource
+    private FileService fileService;
 
     @Override
     public Result getRecordList(Integer userId) {
@@ -100,6 +113,84 @@ public class UserRecordServiceImpl extends ServiceImpl<UserRecordMapper, UserRec
         userRecord.setUserId(userId);
         userRecord.setMeetingId(meetingId);
         userRecordMapper.insert(userRecord);
+    }
+
+    @Override
+    public Result getFileList(Long recordId) {
+        UserRecord userRecord = userRecordMapper.selectById(recordId);
+        if(userRecord == null){
+            return Result.error("未找到会议记录!");
+        }
+        Long meetingId = userRecord.getMeetingId();
+        List<FileListVo> fileListVos = fileService.getFileListByMeetingId(meetingId);
+
+        return Result.success(fileListVos);
+    }
+
+//    @Override
+//    public Result downloadFile(String fileId) {
+//        return fileService.downloadFile(fileId);
+//    }
+
+    @Override
+    public Result downloadFile(HttpServletResponse response, String fileId) {
+        edu.hnu.conference_system.domain.File myFile = fileService.getFileById(fileId) ;
+
+        File file = new File(myFile.getFilePath());
+        if(!file.exists()){
+            return Result.error("下载文件不存在");
+        }
+        response.reset();
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Headers", "*");
+        response.setHeader("Access-Control-Allow-Methods", "*");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setContentType("application/octet-stream");
+        response.setCharacterEncoding("utf-8");
+        response.setContentLength((int) file.length());
+        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.getName(), StandardCharsets.UTF_8) );
+
+        try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));) {
+            byte[] buff = new byte[1024];
+            OutputStream os  = response.getOutputStream();
+            int i = 0;
+            while ((i = bis.read(buff)) != -1) {
+                os.write(buff, 0, i);
+                os.flush();
+            }
+        } catch (IOException e) {
+            return Result.error("下载失败");
+        }
+        return Result.success("下载成功");
+    }
+
+    @Override
+    public Result downloadAudio(HttpServletResponse response, Long recordId) {
+        Long meetingId = userRecordMapper.selectById(recordId).getMeetingId();
+        String audioPath = meetingAudioService.getAudioPathByMeetingId(meetingId);
+
+        File file = new File(audioPath);
+        if(!file.exists()){
+            return Result.error("下载文件不存在");
+        }
+        response.reset();
+        response.setContentType("application/octet-stream");
+        response.setCharacterEncoding("utf-8");
+        response.setContentLength((int) file.length());
+        response.setHeader("Content-Disposition", "attachment;filename=" + file.getName() );
+
+        try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));) {
+            byte[] buff = new byte[1024];
+            OutputStream os  = response.getOutputStream();
+            int i = 0;
+            while ((i = bis.read(buff)) != -1) {
+                os.write(buff, 0, i);
+                os.flush();
+            }
+        } catch (IOException e) {
+            return Result.error("下载失败");
+        }
+        return Result.success("下载成功");
     }
 }
 

@@ -46,8 +46,16 @@ public class RecordController {
 
     @GetMapping("/download/audio")
     @Operation(summary = "下载记录中音频")
-    public Result downloadAudio(HttpServletResponse response, @RequestParam("fileId") Long recordId){
-        return userRecordService.downloadAudio(response,recordId);
+    public void downloadAudio(HttpServletResponse response, @RequestParam("fileId") Long recordId){
+        try {
+            userRecordService.downloadAudio(response, recordId);
+        }catch (Exception e){
+            e.printStackTrace();
+            response.reset();
+            Result result = Result.error(e.getMessage());
+            String json = JSON.toJSONString(result);
+            ServletUtils.renderString(response, json);
+        }
     }
 
     @GetMapping("/get/fileList")

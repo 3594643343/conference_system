@@ -145,39 +145,37 @@ public class UserRecordServiceImpl extends ServiceImpl<UserRecordMapper, UserRec
         response.setHeader("Access-Control-Allow-Headers", "*");
         response.setHeader("Access-Control-Allow-Methods", "*");
         response.setHeader("Access-Control-Allow-Credentials", "true");
-        response.setContentType("application/octet-stream");
-        response.setCharacterEncoding("utf-8");
-        response.setContentLength((int) file.length());
-        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.getName(), StandardCharsets.UTF_8) );
-
-        try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));) {
-            byte[] buff = new byte[1024];
-            OutputStream os  = response.getOutputStream();
-            int i = 0;
-            while ((i = bis.read(buff)) != -1) {
-                os.write(buff, 0, i);
-                os.flush();
-            }
-        } catch (IOException e) {
-            return Result.error("下载失败");
-        }
-        return Result.success("下载成功");
+        return download(response, file);
     }
 
     @Override
     public Result downloadAudio(HttpServletResponse response, Long recordId) {
-        Long meetingId = userRecordMapper.selectById(recordId).getMeetingId();
+        UserRecord userRecord = userRecordMapper.selectById(recordId);
+        Long meetingId = userRecord.getMeetingId();
         String audioPath = meetingAudioService.getAudioPathByMeetingId(meetingId);
+        String name = meetingService.getMeetingNameById(meetingId);
 
         File file = new File(audioPath);
         if(!file.exists()){
             return Result.error("下载文件不存在");
         }
         response.reset();
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Headers", "*");
+        response.setHeader("Access-Control-Allow-Methods", "*");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        return download(response, file,name);
+    }
+
+    private Result download(HttpServletResponse response, File file){
+        return download(response, file, null);
+    }
+    private Result download(HttpServletResponse response, File file,String name) {
         response.setContentType("application/octet-stream");
         response.setCharacterEncoding("utf-8");
         response.setContentLength((int) file.length());
-        response.setHeader("Content-Disposition", "attachment;filename=" + file.getName() );
+        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(Objects.requireNonNullElseGet(name, file::getName), StandardCharsets.UTF_8));
+
 
         try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));) {
             byte[] buff = new byte[1024];

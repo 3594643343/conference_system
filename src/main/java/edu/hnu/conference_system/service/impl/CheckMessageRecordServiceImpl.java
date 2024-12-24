@@ -174,6 +174,7 @@ public class CheckMessageRecordServiceImpl extends ServiceImpl<CheckMessageRecor
         );
         for(CheckMessageRecord record : checkMessageRecords){
             record.setResult(check);
+            checkMessageRecordMapper.updateById(record);
         }
     }
 

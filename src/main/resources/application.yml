@@ -3,9 +3,9 @@ spring:
     name: conference_system
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://121.37.24.76:3306/confdata
-    username: confData
-    password: mysql94
+    url: 
+    username: 
+    password: 
     hikari:
       max-lifetime: 1800000 # 30min
   servlet:
@@ -18,14 +18,6 @@ mybatis-plus:
 server:
   port: 8079
 
-
-#files-upload-url:
-#  avatar: D:/code/files_upload/avatar
-#  group-avatar: D:/code/files_upload/group_avatar
-#  file: D:/code/files_upload/file
-#  default-avatar: D:/code/files_upload/defaultAvatar.jpg
-#  audios: D:/code/files_upload/Audios
-#python-script-path: src/main/java/edu/hnu/conference_system/python/MergeAudios.py
 
 files-upload-url:
   avatar: /www/wwwroot/files_upload/avatar
